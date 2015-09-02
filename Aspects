@@ -1,3 +1,35 @@
+class Condicion
+  def esCumplida(unMetodo)
+  end
+end
+
+class Selector < Condicion
+
+  def initialize(unaExp)
+    @regexp=unaExp
+  end
+  def esCumplida(unMetodo)
+    @regexp.match(unMetodo)
+  end
+end
+
+class CreadorDeCondiciones
+  def initialize
+    @creadorDeCondiciones=Object.new
+  end
+  def self.condicionCreable(nombreMetodo,clase)
+    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(*parametrosNew)}
+  end
+end
+
+$condiciones.each do
+|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
+end
+
+
+
+$condiciones = {:nombre => Selector}
+
 class Aspects
   def self.on(*args,&closure)
 
@@ -11,7 +43,7 @@ class Aspects
 
   def self.encontrarAspectables(*parametros)
     parametros  .map(&:toAspectable)
-        .flatten
+                .flatten
   end
 
   def self.aplicarAspectos(parametros,&closure)
@@ -24,12 +56,15 @@ end
 
 module Aspectable
 
+ $condiciones.keys.map { |unMetodo|   define_method(unMetodo){|*args|[unMetodo,*args]}}
+
+
   def toAspectable
     self
   end
 
   def where(*constructoresCondiciones)
-    condiciones = constructoresCondiciones.map{|constructor| CreadorDeCondiciones.send(constructor)}
+    condiciones = constructoresCondiciones.map{|constructor,*args| CreadorDeCondiciones.send(constructor,*args)}
     puts metodos.select{|metodo|condiciones.all?{|condicion|condicion.esCumplida(metodo)}}.to_s
   end
 
@@ -84,33 +119,5 @@ class Module
   include AbstractAspectable
 end
 
-class Condicion
-  def esCumplida(unMetodo)
-  end
-end
-
-class Selector < Condicion
-
-  def initialize(unaExp)
-    @regexp=unaExp
-  end
-  def esCumplida(unMetodo)
-
-  end
-end
-
-class CreadorDeCondiciones
-  def initialize
-    @creadorDeCondiciones=Object.new
-  end
-  def self.condicionCreable(nombreMetodo,clase)
-    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(parametrosNew)}
-  end
-end
-
-[[:name,Selector]].each do
-|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
-  Aspectable
-end
 
 
