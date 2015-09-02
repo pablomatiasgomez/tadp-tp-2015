@@ -1,0 +1,116 @@
+class Aspects
+  def self.on(*args,&closure)
+
+    aspectables = encontrarAspectables(*args)
+
+    throw(ArgumentError,"Origen Vacio") if aspectables.size==0
+
+    aplicarAspectos(aspectables,&closure)
+
+  end
+
+  def self.encontrarAspectables(*parametros)
+    parametros  .map(&:toAspectable)
+        .flatten
+  end
+
+  def self.aplicarAspectos(parametros,&closure)
+    parametros.each do |arg|
+      (arg.instance_eval &closure)
+    end
+  end
+end
+
+
+module Aspectable
+
+  def toAspectable
+    self
+  end
+
+  def where(*constructoresCondiciones)
+    condiciones = constructoresCondiciones.map{|constructor| CreadorDeCondiciones.send(constructor)}
+    puts metodos.select{|metodo|condiciones.all?{|condicion|condicion.esCumplida(metodo)}}.to_s
+  end
+
+end
+
+module ConcreteAspectable include Aspectable
+
+def define(metodo,&closure)
+  define_singleton_method(metodo,&closure)
+end
+
+def metodos
+  methods
+end
+
+end
+
+module AbstractAspectable include Aspectable
+
+def define(metodo,&closure)
+  define_method(metodo,&closure)
+end
+
+def metodos
+  instance_methods
+end
+
+end
+
+
+class Regexp
+  def toAspectable
+    Object.clases
+        .select{|const|const.to_s.match(self)}
+  end
+end
+
+class Object
+  include ConcreteAspectable
+  def self.clases
+    constants .map(&Object.method(:const_get))
+        .grep(Class)
+  end
+
+end
+
+class Class
+  include AbstractAspectable
+end
+
+class Module
+  include AbstractAspectable
+end
+
+class Condicion
+  def esCumplida(unMetodo)
+  end
+end
+
+class Selector < Condicion
+
+  def initialize(unaExp)
+    @regexp=unaExp
+  end
+  def esCumplida(unMetodo)
+
+  end
+end
+
+class CreadorDeCondiciones
+  def initialize
+    @creadorDeCondiciones=Object.new
+  end
+  def self.condicionCreable(nombreMetodo,clase)
+    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(parametrosNew)}
+  end
+end
+
+[[:name,Selector]].each do
+|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
+  Aspectable
+end
+
+
