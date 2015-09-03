@@ -1,56 +1,5 @@
-class Condicion
-  def esCumplida(unMetodo)
-  end
-end
-
-class Visibilidad < Condicion
-  def esCumplida(unMetodo,poseedorDelMetodo)
-    poseedorDelMetodo.esPublico?(unMetodo) == debeSerPublico
-  end
-end
-
-
-
-class EsPrivado < Visibilidad
-  def debeSerPublico
-    false
-  end
-end
-
-class EsPublico < Visibilidad
-  def debeSerPublico
-    true
-  end
-end
-
-class Selector < Condicion
-
-  def initialize(unaExp)
-    @regexp=unaExp
-  end
-  def esCumplida(unMetodo,poseedorDelMetodo)
-    @regexp.match(unMetodo)
-  end
-end
-
-class CreadorDeCondiciones
-  def initialize
-    @creadorDeCondiciones=Object.new
-  end
-  def self.condicionCreable(nombreMetodo,clase)
-    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(*parametrosNew)}
-  end
-end
-
-$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico}
-
-$condiciones.each do
-|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
-end
-
-
-
-
+load 'Condiciones'
+load 'ClasesExtendidas'
 
 class Aspects
   def self.on(*args,&closure)
@@ -126,42 +75,5 @@ def esPublico?(unMetodo)
 end
 
 end
-
-class Array
-  def grepv(parametroMagico)
-    self-self.grep(parametroMagico)
-  end
-end
-
-class Regexp
-  def toAspectable
-    (Object.clases+Object.modulos).uniq
-                                  .select{|const|const.to_s.match(self)}
-  end
-end
-
-class Object
-  include ConcreteAspectable
-  def self.clases
-    constantesQueSon(Class)
-  end
-  def self.modulos
-    constantesQueSon(Module)
-  end
-  def self.constantesQueSon(unTipo)
-    constants .map(&Object.method(:const_get))
-        .grep(unTipo)
-  end
-
-end
-
-class Class
-  include AbstractAspectable
-end
-
-class Module
-  include AbstractAspectable
-end
-
 
 
