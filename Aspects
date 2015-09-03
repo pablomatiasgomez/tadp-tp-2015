@@ -3,12 +3,32 @@ class Condicion
   end
 end
 
+class Visibilidad < Condicion
+  def esCumplida(unMetodo,poseedorDelMetodo)
+    poseedorDelMetodo.esPublico?(unMetodo) == debeSerPublico
+  end
+end
+
+
+
+class EsPrivado < Visibilidad
+  def debeSerPublico
+    false
+  end
+end
+
+class EsPublico < Visibilidad
+  def debeSerPublico
+    true
+  end
+end
+
 class Selector < Condicion
 
   def initialize(unaExp)
     @regexp=unaExp
   end
-  def esCumplida(unMetodo)
+  def esCumplida(unMetodo,poseedorDelMetodo)
     @regexp.match(unMetodo)
   end
 end
@@ -22,13 +42,15 @@ class CreadorDeCondiciones
   end
 end
 
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico}
+
 $condiciones.each do
 |metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
 end
 
 
 
-$condiciones = {:nombre => Selector}
+
 
 class Aspects
   def self.on(*args,&closure)
@@ -65,8 +87,10 @@ module Aspectable
 
   def where(*constructoresCondiciones)
     condiciones = constructoresCondiciones.map{|constructor,*args| CreadorDeCondiciones.send(constructor,*args)}
-    puts metodos.select{|metodo|condiciones.all?{|condicion|condicion.esCumplida(metodo)}}.to_s
+    puts metodos.select{|metodo|condiciones.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
   end
+
+
 
 end
 
@@ -77,7 +101,12 @@ def define(metodo,&closure)
 end
 
 def metodos
-  methods
+  methods + private_methods
+end
+
+def esPublico?(unMetodo)
+  self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
+  self.public_methods.include?(unMetodo)
 end
 
 end
@@ -89,7 +118,12 @@ def define(metodo,&closure)
 end
 
 def metodos
-  instance_methods
+  instance_methods + private_instance_methods
+end
+
+def esPublico?(unMetodo)
+  self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
+  self.public_instance_methods.include?(unMetodo)
 end
 
 end
