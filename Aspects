@@ -52,9 +52,14 @@ def metodos
   methods + private_methods
 end
 
-def esPublico?(unMetodo)
+def espublico?(unMetodo)
   self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
   self.public_methods.include?(unMetodo)
+end
+
+def esprivado?(unMetodo)
+  self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
+  self.private_methods.include?(unMetodo)
 end
 
 end
@@ -69,10 +74,16 @@ def metodos
   instance_methods + private_instance_methods
 end
 
-def esPublico?(unMetodo)
+def espublico?(unMetodo)
   self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
   self.public_instance_methods.include?(unMetodo)
 end
+
+def esprivado?(unMetodo)
+  self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
+  self.private_instance_methods.include?(unMetodo)
+end
+
 
 end
 

@@ -1,0 +1,41 @@
+class Condicion
+  def esCumplida(unMetodo)
+  end
+end
+
+class Visibilidad < Condicion
+  def esCumplida(unMetodo,poseedorDelMetodo)
+    poseedorDelMetodo.send(self.class.to_s.downcase+"?",unMetodo)
+  end
+end
+
+class EsPrivado < Visibilidad
+end
+
+class EsPublico < Visibilidad
+end
+
+class Selector < Condicion
+
+  def initialize(unaExp)
+    @regexp=unaExp
+  end
+  def esCumplida(unMetodo,poseedorDelMetodo)
+    @regexp.match(unMetodo)
+  end
+end
+
+class CreadorDeCondiciones
+  def initialize
+    @creadorDeCondiciones=Object.new
+  end
+  def self.condicionCreable(nombreMetodo,clase)
+    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(*parametrosNew)}
+  end
+end
+
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico}
+
+$condiciones.each do
+|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
+end
