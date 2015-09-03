@@ -64,8 +64,7 @@ class Aspects
   end
 
   def self.encontrarAspectables(*parametros)
-    parametros  .map(&:toAspectable)
-                .flatten
+    parametros.grep(Regexp).map(&:toAspectable).reduce(parametros.grepv(Regexp)){|acum,coso|coso+acum}
   end
 
   def self.aplicarAspectos(parametros,&closure)
@@ -128,19 +127,30 @@ end
 
 end
 
+class Array
+  def grepv(parametroMagico)
+    self-self.grep(parametroMagico)
+  end
+end
 
 class Regexp
   def toAspectable
-    Object.clases
-        .select{|const|const.to_s.match(self)}
+    (Object.clases+Object.modulos).uniq
+                                  .select{|const|const.to_s.match(self)}
   end
 end
 
 class Object
   include ConcreteAspectable
   def self.clases
+    constantesQueSon(Class)
+  end
+  def self.modulos
+    constantesQueSon(Module)
+  end
+  def self.constantesQueSon(unTipo)
     constants .map(&Object.method(:const_get))
-        .grep(Class)
+        .grep(unTipo)
   end
 
 end
