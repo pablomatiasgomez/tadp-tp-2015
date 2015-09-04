@@ -2,13 +2,20 @@ class InyeccionParametro
 end
 class Redireccion
 end
+class InyeccionDeLogica
+end
+class Antes < InyeccionDeLogica
+end
+class Despues < InyeccionDeLogica
+end
+class EnLugarDe < InyeccionDeLogica
+end
 
 class Transformable
   attr_reader :aspectable, :old_method
   def self.define_known_method_to_transformation(method_name,related_class)
     define_method(method_name) do
       |*parameters,&block|
-      aspectable.alias("old_"+old_method.to_s,old_method)
       aspectable.define(old_method,&related_class.new(*parameters,&block).new_method(aspectable,old_method))
     end
   end
@@ -18,8 +25,9 @@ class Transformable
   end
 end
 
-$transformations = {:inject => InyeccionParametro,:redirect_to =>Redireccion}
+$transformations = {:inject => InyeccionParametro,:redirect_to =>Redireccion,:before => Antes, :after =>Despues, :instead_of =>EnLugarDe }
 $transformations.each {|method_name,related_class|Transformable.define_known_method_to_transformation(method_name,related_class)}
+
 
 class InyeccionParametro
   attr_reader :dictionary
@@ -27,15 +35,15 @@ class InyeccionParametro
     @dictionary=dictionary
   end
   def new_method(aspectable,method)
-
-    injectable_parameters_with_index=aspectable.metodo(method)
+    old_method=aspectable.metodo(method)
+    injectable_parameters_with_index=old_method
                                           .parameter_names.select_with_index{|param,_|dictionary.fetch(param){}}
                                           .map{|param,index|[dictionary.fetch(param){},index]}
 
     proc do
       |*args|
       injectable_parameters_with_index.each {|param,index| (param.is_a?Proc) ? args[index]=param.call(self,method.to_s,args[index]): args[index]=param }
-      self.send("old_"+method.to_s,*args)
+      old_method.bind(self).call(*args)
     end
   end
 end
@@ -45,11 +53,52 @@ class Redireccion
   def initialize(target)
     @target=target
   end
-  def new_method(aspectable,method)
+  def new_method(_,method)
     target_object=target
     proc do
     |*args|
     target_object.send(method,*args)
+    end
+  end
+end
+
+class InyeccionDeLogica
+  attr_reader :block
+  def initialize(&block)
+    @block=block
+  end
+end
+
+class Antes
+  def new_method(aspectable,method)
+    block_object=block
+    old_method=aspectable.metodo(method)
+    proc do
+      |*args|
+      self.instance_eval &block_object
+      old_method.bind(self).call(*args)
+    end
+  end
+end
+
+class EnLugarDe
+  def new_method(aspectable,method)
+    block_object=block
+    proc do
+    |*args|
+      self.instance_eval &block_object
+    end
+  end
+end
+
+class Despues
+  def new_method(aspectable,method)
+    block_object=block
+    old_method=aspectable.metodo(method)
+    proc do
+    |*args|
+      old_method.bind(self).call(*args)
+      self.instance_eval &block_object
     end
   end
 end
