@@ -16,8 +16,10 @@ class CantParametros < CondicionParametros
 end
 class NombreParametros < CondicionParametros
 end
+class Negacion < Condicion
+end
 
-$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CondicionParametrosCreator}
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CondicionParametrosCreator, :neg => Negacion}
 $condiciones.each do |condition,cond_class| Aspectable.define_known_method_to_object(condition,cond_class) end
 
 class Condicion
@@ -92,3 +94,12 @@ class NombreParametros < CondicionParametros
   end
 end
 
+
+class Negacion < Condicion
+    def initialize(*conditions)
+      @conditions=conditions
+    end
+    def esCumplida(method,method_owner)
+      @conditions.none?{|condition|condition.esCumplida(method,method_owner)}
+    end
+end
