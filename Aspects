@@ -27,15 +27,15 @@ end
 
 module Aspectable
   extend MethodReflector
- $condiciones.keys.map(&method(:define_method_reflector))
- $tiposParametros.keys.map{|unTP| Aspectable.send(:define_method,unTP){unTP}}
+  define_known_method_to_object_block_method = proc {|method_name,related_class| define_method(method_name){|*parameters,&block| related_class.new(*parameters,&block)}}
+  $tiposParametros.each{|symbol,condition| Aspectable.send(:define_method,symbol){condition}}
+  $condiciones.each do |condition,cond_class| define_known_method_to_object_block_method.call(condition,cond_class) end
 
   def toAspectable
     self
   end
 
-  def where(*reflected_methods)
-    conditions = reflected_methods.map{|method| CreadorDeCondiciones.send("create_" + method.method_name.to_s,*method.parameters)}
+  def where(*conditions)
     puts metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
   end
 

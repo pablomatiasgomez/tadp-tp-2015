@@ -1,12 +1,20 @@
-class CreadorDeCondiciones
-  def initialize
-    @creadorDeCondiciones=Object.new
-  end
-  def self.define_condition_constructor(nombreMetodo,clase)
-    define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(*parametrosNew)}
-  end
+class Condicion
+end
+class Visibilidad < Condicion
+end
+class EsPublico < Visibilidad
+end
+class EsPrivado < Visibilidad
+end
+class Selector < Condicion
+end
+class CantParametros < Condicion
+end
+class CondicionTipoParametro
 end
 
+
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CantParametros}
 
 
 class Condicion
@@ -43,38 +51,18 @@ class Selector < Condicion
   end
 end
 
-class CondicionTipoParametro
-  def esCumplido(modoParametro)
-    @condicion.call(modoParametro)
-  end
-  def condicion(&unaCond)
-    @condicion=unaCond
-  end
-end
 
-
-$tiposParametros = {:mandatory=>CondicionTipoParametro.new,:optional=>CondicionTipoParametro.new,:both=>CondicionTipoParametro.new}
-$tiposParametros[:mandatory].condicion{|modo|modo==:req}
-$tiposParametros[:optional].condicion{|modo|modo==:opt}
-$tiposParametros[:both].condicion{true}
-
+$tiposParametros = {:mandatory=>proc{|modo|modo==:req},:optional=>proc{|modo|modo==:opt},:both=>proc{true}}
 
 class CantParametros < Condicion
 
-  def initialize(unaCant,unModo=:both)
+  def initialize(unaCant,unModo=$tiposParametros[:both])
     @cant=unaCant
-    @modo=$tiposParametros[unModo]
+    @modo=unModo
   end
+
   def esCumplida(nomMetodo,poseedorDelMetodo)
-    poseedorDelMetodo.metodo(nomMetodo).parameters.count{|modoParam,nombreParam|@modo.esCumplido(modoParam)}==@cant
+    poseedorDelMetodo.metodo(nomMetodo).parameters.count{|modoParam|@modo.call(modoParam)}==@cant
   end
 
 end
-
-
-$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CantParametros}
-
-$condiciones.each do
-|metodo,clase| CreadorDeCondiciones.send(:define_condition_constructor,"create_" + metodo.to_s,clase)
-end
-
