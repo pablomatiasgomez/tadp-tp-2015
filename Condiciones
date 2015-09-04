@@ -8,11 +8,16 @@ class EsPrivado < Visibilidad
 end
 class Selector < Condicion
 end
-class CantParametros < Condicion
+class CondicionParametros
+end
+class CondicionParametrosCreator
+end
+class CantParametros < CondicionParametros
+end
+class NombreParametros < CondicionParametros
 end
 
-
-$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CantParametros}
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CondicionParametrosCreator}
 $condiciones.each do |condition,cond_class| Aspectable.define_known_method_to_object(condition,cond_class) end
 
 class Condicion
@@ -52,15 +57,38 @@ end
 $tiposParametros = {:mandatory=>proc{|modo|modo==:req},:optional=>proc{|modo|modo==:opt},:both=>proc{true}}
 $tiposParametros.each{|symbol,condition| Aspectable.send(:define_method,symbol){condition}}
 
-class CantParametros < Condicion
 
+
+class CondicionParametrosCreator #Atado horriblemente con alambre
+  def self.new(unaCant,unParametro=$tiposParametros[:both])
+    (unParametro.is_a?Regexp) ? NombreParametros.new(unaCant,unParametro) : CantParametros.new(unaCant,unParametro)
+  end
+end
+
+class CondicionParametros
+  attr_reader :cant
+  def esCumplida(method,method_owner)
+    method_owner.metodo(method).parameters.count(&condition)==cant
+  end
+end
+
+class CantParametros < CondicionParametros
   def initialize(unaCant,unModo=$tiposParametros[:both])
     @cant=unaCant
     @modo=unModo
   end
-
-  def esCumplida(nomMetodo,poseedorDelMetodo)
-    poseedorDelMetodo.metodo(nomMetodo).parameters.count{|modoParam|@modo.call(modoParam)}==@cant
+  def condition
+    proc {|modoParam|@modo.call(modoParam)}
   end
-
 end
+
+class NombreParametros < CondicionParametros
+    def initialize(unaCant,unNombre)
+    @cant=unaCant
+    @nombre=unNombre
+    end
+  def condition
+    proc {|_,nomParam|@nombre.match(nomParam)}
+  end
+end
+
