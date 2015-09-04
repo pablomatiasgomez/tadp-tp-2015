@@ -31,12 +31,9 @@ class InyeccionParametro
                                           .map{|param,index|[dictionary.fetch(param){},index]}
 
     proc do
-
       |*args|
-      injectable_parameters_with_index.each {|param,index| args[index]=param }
+      injectable_parameters_with_index.each {|param,index| (param.is_a?Proc) ? args[index]=param.call(self,method.to_s,args[index]): args[index]=param }
       self.send("old_"+method.to_s,*args)
-
     end
-
   end
 end
