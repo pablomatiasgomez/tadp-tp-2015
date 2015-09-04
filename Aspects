@@ -35,59 +35,36 @@ module Aspectable
     puts metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
   end
 
+  define_method(:define){|method,&closure|singleton_class.send("define_"+modifier+"method",method,&closure)}
+  define_method(:metodos){send(modifier+"methods") + send("private_"+modifier+"methods")}
+  define_method(:metodo){|method|send(modifier+"method",method)}
+  define_method(:espublico?)do
+  |method|
+    metodo(method)
+    send("public_"+modifier+"methods").include?(method)
+  end
+  define_method(:esprivado?)do
+  |method|
+    metodo(method)
+    send("private_"+modifier+"methods").include?(method)
+  end
+
 end
 
 module ConcreteAspectable
   include Aspectable
 
-def define(metodo,&closure)
-  define_singleton_method(metodo,&closure)
-end
-
-def metodos
-  methods + private_methods
-end
-
-def metodo(unMetodo)
-  method(unMetodo)
-end
-
-def espublico?(unMetodo)
-  self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
-  self.public_methods.include?(unMetodo)
-end
-
-def esprivado?(unMetodo)
-  self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
-  self.private_methods.include?(unMetodo)
+def modifier
+  ""
 end
 
 end
 
 module AbstractAspectable include Aspectable
 
-def define(metodo,&closure)
-  define_method(metodo,&closure)
+def modifier
+  "instance_"
 end
-
-def metodos
-  instance_methods + private_instance_methods
-end
-
-def metodo(unMetodo)
-  instance_method(unMetodo)
-end
-
-def espublico?(unMetodo)
-  self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
-  self.public_instance_methods.include?(unMetodo)
-end
-
-def esprivado?(unMetodo)
-  self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
-  self.private_instance_methods.include?(unMetodo)
-end
-
 
 end
 
