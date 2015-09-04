@@ -1,7 +1,3 @@
-load 'Condiciones'
-load 'MethodReflector'
-load 'MethodReflector'
-
 class Aspects
   def self.on(*args,&closure)
 
@@ -26,10 +22,10 @@ end
 
 
 module Aspectable
-  extend MethodReflector
-  define_known_method_to_object_block_method = proc {|method_name,related_class| define_method(method_name){|*parameters,&block| related_class.new(*parameters,&block)}}
-  $tiposParametros.each{|symbol,condition| Aspectable.send(:define_method,symbol){condition}}
-  $condiciones.each do |condition,cond_class| define_known_method_to_object_block_method.call(condition,cond_class) end
+
+  def self.define_known_method_to_object(method_name,related_class)
+    define_method(method_name){|*parameters,&block| related_class.new(*parameters,&block)}
+  end
 
   def toAspectable
     self
@@ -97,3 +93,5 @@ end
 
 
 load 'ClasesExtendidas'
+load 'Condiciones'
+load 'MethodReflector'

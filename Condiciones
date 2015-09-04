@@ -10,18 +10,15 @@ class Selector < Condicion
 end
 class CantParametros < Condicion
 end
-class CondicionTipoParametro
-end
 
 
 $condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CantParametros}
-
+$condiciones.each do |condition,cond_class| Aspectable.define_known_method_to_object(condition,cond_class) end
 
 class Condicion
   def esCumplida(unMetodo)
   end
 end
-
 
 
 
@@ -53,6 +50,7 @@ end
 
 
 $tiposParametros = {:mandatory=>proc{|modo|modo==:req},:optional=>proc{|modo|modo==:opt},:both=>proc{true}}
+$tiposParametros.each{|symbol,condition| Aspectable.send(:define_method,symbol){condition}}
 
 class CantParametros < Condicion
 
