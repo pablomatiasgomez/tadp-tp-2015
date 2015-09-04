@@ -1,0 +1,42 @@
+class InyeccionParametro
+end
+
+class Transformable
+  attr_reader :aspectable, :old_method
+  def self.define_known_method_to_transformation(method_name,related_class)
+    define_method(method_name) do
+      |*parameters,&block|
+      aspectable.alias("old_"+old_method.to_s,old_method)
+      aspectable.define(old_method,&related_class.new(*parameters,&block).new_method(aspectable,old_method))
+    end
+  end
+  def initialize(aspectable,method)
+    @aspectable=aspectable
+    @old_method=method
+  end
+end
+
+$transformations = {:inject => InyeccionParametro}
+$transformations.each {|method_name,related_class|Transformable.define_known_method_to_transformation(method_name,related_class)}
+
+class InyeccionParametro
+  attr_reader :dictionary
+  def initialize(dictionary)
+    @dictionary=dictionary
+  end
+  def new_method(aspectable,method)
+
+    injectable_parameters_with_index=aspectable.metodo(method)
+                                          .parameter_names.select_with_index{|param,_|dictionary.fetch(param){}}
+                                          .map{|param,index|[dictionary.fetch(param){},index]}
+
+    proc do
+
+      |*args|
+      injectable_parameters_with_index.each {|param,index| args[index]=param }
+      self.send("old_"+method.to_s,*args)
+
+    end
+
+  end
+end

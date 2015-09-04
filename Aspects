@@ -1,3 +1,4 @@
+load 'Transformable'
 class Aspects
   def self.on(*args,&closure)
 
@@ -33,37 +34,39 @@ module Aspectable
 
   def where(*conditions)
     puts metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
+    metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}
   end
 
-  define_method(:define){|method,&closure|singleton_class.send("define_"+modifier+"method",method,&closure)}
-  define_method(:metodos){send(modifier+"methods") + send("private_"+modifier+"methods")}
-  define_method(:metodo){|method|send(modifier+"method",method)}
-  define_method(:espublico?)do
-  |method|
-    metodo(method)
-    send("public_"+modifier+"methods").include?(method)
+  def transform(methods,&transformation)
+    puts methods.each {|method| Transformable.new(self,method).instance_eval &transformation}
   end
-  define_method(:esprivado?)do
-  |method|
-    metodo(method)
-    send("private_"+modifier+"methods").include?(method)
+
+  def call_in_context(method,*arguments,&block)
+    define_method_target.send(method,*arguments,&block)
   end
+
+  define_method(:define){|method,&closure|call_in_context(:define_method,method,&closure)}
+  define_method(:metodos){call_in_context(:instance_methods) + call_in_context(:private_instance_methods)}
+  define_method(:metodo){|method|call_in_context(:instance_method,method)}
+  define_method(:espublico?){|method| call_in_context(:public_instance_methods).include?(method)}
+  define_method(:esprivado?){|method|  call_in_context(:private_instance_methods).include?(method)}
+  define_method(:alias){|new_name,old_name|call_in_context(:alias_method, new_name, old_name)}
 
 end
 
 module ConcreteAspectable
   include Aspectable
 
-def modifier
-  ""
+def define_method_target
+  singleton_class
 end
 
 end
 
 module AbstractAspectable include Aspectable
 
-def modifier
-  "instance_"
+def define_method_target
+  self
 end
 
 end

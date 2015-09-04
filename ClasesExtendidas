@@ -2,6 +2,9 @@ class Array
   def grepv(parametroMagico)
     self-self.grep(parametroMagico)
   end
+  def select_with_index(&block)
+    each_with_index.select(&block)
+  end
 end
 
 class Regexp
@@ -24,6 +27,18 @@ class Object
         .grep(unTipo)
   end
 
+end
+
+class Method
+  def parameter_names
+    parameters.map{|_,name|name}
+  end
+end
+
+class UnboundMethod
+  def parameter_names
+    parameters.map{|_,name|name}
+  end
 end
 
 class Class
