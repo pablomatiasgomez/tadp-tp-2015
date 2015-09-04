@@ -1,4 +1,6 @@
 load 'Condiciones'
+load 'MethodReflector'
+load 'MethodReflector'
 
 class Aspects
   def self.on(*args,&closure)
@@ -24,24 +26,23 @@ end
 
 
 module Aspectable
-
- $condiciones.keys.map { |unMetodo|   define_method(unMetodo){|*args|[unMetodo,*args]}}
+  extend MethodReflector
+ $condiciones.keys.map(&method(:define_method_reflector))
  $tiposParametros.keys.map{|unTP| Aspectable.send(:define_method,unTP){unTP}}
 
   def toAspectable
     self
   end
 
-  def where(*constructoresCondiciones)
-    condiciones = constructoresCondiciones.map{|constructor,*args| CreadorDeCondiciones.send(constructor,*args)}
-    puts metodos.select{|metodo|condiciones.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
+  def where(*reflected_methods)
+    conditions = reflected_methods.map{|method| CreadorDeCondiciones.send("create_" + method.method_name.to_s,*method.parameters)}
+    puts metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
   end
-
-
 
 end
 
-module ConcreteAspectable include Aspectable
+module ConcreteAspectable
+  include Aspectable
 
 def define(metodo,&closure)
   define_singleton_method(metodo,&closure)

@@ -2,7 +2,7 @@ class CreadorDeCondiciones
   def initialize
     @creadorDeCondiciones=Object.new
   end
-  def self.condicionCreable(nombreMetodo,clase)
+  def self.define_condition_constructor(nombreMetodo,clase)
     define_singleton_method(nombreMetodo){|*parametrosNew|clase.new(*parametrosNew)}
   end
 end
@@ -75,5 +75,6 @@ end
 $condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CantParametros}
 
 $condiciones.each do
-|metodo,clase| CreadorDeCondiciones.send(:condicionCreable,metodo,clase)
+|metodo,clase| CreadorDeCondiciones.send(:define_condition_constructor,"create_" + metodo.to_s,clase)
 end
+
