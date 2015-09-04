@@ -1,5 +1,4 @@
 load 'Condiciones'
-load 'ClasesExtendidas'
 
 class Aspects
   def self.on(*args,&closure)
@@ -27,7 +26,7 @@ end
 module Aspectable
 
  $condiciones.keys.map { |unMetodo|   define_method(unMetodo){|*args|[unMetodo,*args]}}
-
+ $tiposParametros.keys.map{|unTP| Aspectable.send(:define_method,unTP){unTP}}
 
   def toAspectable
     self
@@ -52,6 +51,10 @@ def metodos
   methods + private_methods
 end
 
+def metodo(unMetodo)
+  method(unMetodo)
+end
+
 def espublico?(unMetodo)
   self.method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
   self.public_methods.include?(unMetodo)
@@ -74,6 +77,10 @@ def metodos
   instance_methods + private_instance_methods
 end
 
+def metodo(unMetodo)
+  instance_method(unMetodo)
+end
+
 def espublico?(unMetodo)
   self.instance_method(unMetodo) #Nomas para garantizar que el metodo exista, si no existe explota aca
   self.public_instance_methods.include?(unMetodo)
@@ -88,3 +95,4 @@ end
 end
 
 
+load 'ClasesExtendidas'
