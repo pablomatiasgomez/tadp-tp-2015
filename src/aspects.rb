@@ -12,7 +12,11 @@ class Aspects
       end
     end
 
-    origins.uniq
+    if origins.empty?
+      raise 'Error: Empty Origin'
+    else
+      origins.uniq
+    end
     # Abajo otra opcion para hacer esto
 =begin
     args_regexps = args.grep(Regexp)
@@ -22,7 +26,13 @@ class Aspects
       regexp_origins += Object.constants.grep(one_regexp).map {|regex_symbol| Object.const_get(regex_symbol)}
     end
 
-    (args - args_regexps + regexp_origins).uniq
+    origins =(args - args_regexps + regexp_origins)
+
+    if origins.empty?
+      raise 'Error: Empty origin'
+    else
+      origins.uniq
+    end
 =end
   end
 

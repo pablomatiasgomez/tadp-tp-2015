@@ -35,7 +35,11 @@ describe 'probando que busque bien los origenes' do
   it 'should get classes and modules and objects without repeated elements' do
     expect(Aspects.find_origins Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa,  Object, ObjectSpace, objectB, B, MSarasa, sarasa, D]
     # El expect de la segunda forma
-    # expect(Aspects.on Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa, objectB, B, sarasa, D, Object, ObjectSpace, MSarasa]
+    # expect(Aspects.find_origins Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa, objectB, B, sarasa, D, Object, ObjectSpace, MSarasa]
+  end
+
+  it 'should raise Error: Empty Origin' do
+    expect { Aspects.find_origins }.to raise_error(RuntimeError, 'Error: Empty Origin')
   end
 
 end
