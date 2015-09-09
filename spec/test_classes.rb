@@ -1,11 +1,11 @@
 class Sarasa
 end
 
-class B
+class TestClass
 end
 
 module Marasa
 end
 
-module D
+module AnotherTestClass
 end
