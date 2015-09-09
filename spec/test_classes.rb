@@ -9,6 +9,10 @@ class TestClass
 end
 
 module Marasa
+  def foo ( param1 , param2 )
+  end
+  def bar ( param1 )
+  end
 end
 
 module AnotherTestClass

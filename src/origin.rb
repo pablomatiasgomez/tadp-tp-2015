@@ -24,7 +24,11 @@ class Origin
   end
 
   def has_parameters(count, mode = proc {|p| p})
-    proc { |origin, method| (origin.aspects_target.instance_method(method).parameters.select(&mode).length) == count}
+    if mode.is_a?(Regexp)
+      proc { |origin, method| (origin.origin_method(method).parameters.select{ |_, p| p.match(mode) }.length) == count}
+    else
+      proc { |origin, method| (origin.origin_method(method).parameters.select(&mode).length) == count}
+    end
   end
 
   def where(*conditions)
