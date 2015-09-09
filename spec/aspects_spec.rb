@@ -17,7 +17,7 @@ describe 'origins find' do
 
 
   it 'should get modules' do
-    expect(Aspects.find_origins Marasa,AnotherTestClass).to eq [Marasa,AnotherTestClass]
+    expect(Aspects.find_origins Marasa,TestModule).to eq [Marasa,TestModule]
   end
 
   it 'should get the classes and modules from the regexps' do
@@ -25,7 +25,7 @@ describe 'origins find' do
   end
 
   it 'should get classes and modules and objects without repeated elements' do
-    expect(Aspects.find_origins Sarasa, /^Ob.*/, object_b, TestClass, /.*rasa/, sarasa, AnotherTestClass).to eq [Sarasa,  Object, ObjectSpace, object_b, TestClass, Marasa, sarasa, AnotherTestClass]
+    expect(Aspects.find_origins Sarasa, /^Ob.*/, object_b, TestClass, /.*rasa/, sarasa, TestModule).to eq [Sarasa,  Object, ObjectSpace, object_b, TestClass, Marasa, sarasa, TestModule]
   end
 
   it 'should raise Error: Empty Origin' do

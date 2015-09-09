@@ -62,7 +62,7 @@ describe 'Origins conditions' do
     expect(three_optional_condition).to eq([:foo, :bar])
   end
 
-  it 'should get bar method from Sarasa' do
+  it 'should get bar method from Marasa' do
     one_parameter_with_param =   (Aspects.on Marasa do
                                     where has_parameters( 1 , /param.*/)
                                   end).map { |_, m| m}
@@ -70,7 +70,7 @@ describe 'Origins conditions' do
     expect(one_parameter_with_param).to eq([:bar])
   end
 
-  it 'should get bar method from Sarasa' do
+  it 'should get foo method from Marasa' do
     two_parameter_with_param =   (Aspects.on Marasa do
                                     where has_parameters( 2 , /param.*/)
                                   end).map { |_, m| m}
@@ -78,12 +78,22 @@ describe 'Origins conditions' do
     expect(two_parameter_with_param).to eq([:foo])
   end
 
-  it 'should get bar method from Sarasa' do
+  it 'should get no methods from Marasa' do
     three_parameter_with_param =   (Aspects.on Marasa do
       where has_parameters( 3 , /param.*/)
     end).map { |_, m| m}
 
     expect(three_parameter_with_param).to eq([])
   end
+
+  it 'should get foo2 and foo3 methods from Marasa' do
+    neg_condition =   (Aspects.on TestModule do
+                        where name(/foo\d/), neg(has_parameters(1))
+                      end).map { |_, m| m}
+
+    expect(neg_condition).to eq([:foo2, :foo3])
+  end
+
+
 
 end

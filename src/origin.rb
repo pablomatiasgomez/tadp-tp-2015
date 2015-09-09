@@ -15,20 +15,26 @@ class Origin
     proc { |origin, method| origin.aspects_target.private_instance_methods.include?(method)}
   end
 
-  def mandatory
-    proc { |mode, _| mode == :req }
-  end
-
-  def optional
-    proc { |mode, _| mode == :opt }
-  end
-
   def has_parameters(count, mode = proc {|p| p})
+
+    def mandatory
+      proc { |mode, _| mode == :req }
+    end
+
+    def optional
+      proc { |mode, _| mode == :opt }
+    end
+
     if mode.is_a?(Regexp)
       proc { |origin, method| (origin.origin_method(method).parameters.select{ |_, p| p.match(mode) }.length) == count}
     else
       proc { |origin, method| (origin.origin_method(method).parameters.select(&mode).length) == count}
     end
+
+  end
+
+  def neg(condition)
+    proc { |origin_method| !(condition.call(origin_method))}
   end
 
   def where(*conditions)
@@ -37,9 +43,9 @@ class Origin
       methods_to_transform+= origin.get_origin_methods
     end
 
-    methods_to_transform.select! do |method|
+    methods_to_transform.select! do |origin_method|
       conditions.all? do |condition|
-        condition.call(method)
+        condition.call(origin_method)
       end
     end
 
