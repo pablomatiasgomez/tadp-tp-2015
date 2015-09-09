@@ -2,7 +2,7 @@ require 'rspec'
 require_relative '../src/aspects.rb'
 require_relative 'test_classes.rb'
 
-describe 'origins find' do
+describe 'Origins Find' do
 
   let(:sarasa) { Sarasa.new }
   let(:object_b) { TestClass.new }

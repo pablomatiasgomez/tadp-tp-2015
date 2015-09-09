@@ -2,7 +2,7 @@ require 'rspec'
 require_relative '../src/aspects.rb'
 require_relative 'test_classes.rb'
 
-describe 'Origins conditions' do
+describe 'Origins Conditions' do
 
   let(:object_instance_methods) {Object.instance_methods+Object.private_instance_methods}
 
