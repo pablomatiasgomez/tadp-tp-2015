@@ -6,6 +6,11 @@ class Sarasa
 end
 
 class TestClass
+  def foo
+  end
+  private
+  def bar
+  end
 end
 
 module Marasa
