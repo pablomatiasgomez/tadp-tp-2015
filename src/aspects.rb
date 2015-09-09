@@ -1,3 +1,6 @@
+require_relative 'origin.rb'
+
+
 class Aspects
 
   def self.find_origins(*args)
@@ -37,9 +40,10 @@ class Aspects
   end
 
   def self.on(*args, &block)
+    origin = Origin.new
+    origin.origins= find_origins(*args)
 
-    origins = find_origins(*args)
-
+    origin.instance_eval &block
   end
 
 end

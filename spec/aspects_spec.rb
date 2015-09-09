@@ -1,16 +1,8 @@
 require 'rspec'
 require_relative '../src/aspects.rb'
+require_relative 'test_classes.rb'
 
 describe 'probando que busque bien los origenes' do
-
-  class Sarasa
-  end
-  class B
-  end
-  module MSarasa
-  end
-  module D
-  end
 
   let(:sarasa) { Sarasa.new }
   let(:objectB) { B.new }
@@ -25,15 +17,15 @@ describe 'probando que busque bien los origenes' do
 
 
   it 'should get modules' do
-    expect(Aspects.find_origins MSarasa,D).to eq [MSarasa,D]
+    expect(Aspects.find_origins Marasa,D).to eq [Marasa,D]
   end
 
   it 'should get the classes and modules from the regexps' do
-    expect(Aspects.find_origins /^Ob.*/, /.*rasa/).to eq [Object, ObjectSpace, Sarasa, MSarasa]
+    expect(Aspects.find_origins /^Ob.*/, /.*rasa/).to eq [Object, ObjectSpace, Sarasa, Marasa]
   end
 
   it 'should get classes and modules and objects without repeated elements' do
-    expect(Aspects.find_origins Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa,  Object, ObjectSpace, objectB, B, MSarasa, sarasa, D]
+    expect(Aspects.find_origins Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa,  Object, ObjectSpace, objectB, B, Marasa, sarasa, D]
     # El expect de la segunda forma
     # expect(Aspects.find_origins Sarasa, /^Ob.*/, objectB, B, /.*rasa/, sarasa, D).to eq [Sarasa, objectB, B, sarasa, D, Object, ObjectSpace, MSarasa]
   end
