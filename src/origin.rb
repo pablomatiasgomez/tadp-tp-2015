@@ -15,6 +15,18 @@ class Origin
     proc { |origin, method| origin.aspects_target.private_instance_methods.include?(method)}
   end
 
+  def mandatory
+    proc { |mode, _| mode == :req }
+  end
+
+  def optional
+    proc { |mode, _| mode == :opt }
+  end
+
+  def has_parameters(count, mode = proc {|p| p})
+    proc { |origin, method| (origin.aspects_target.instance_method(method).parameters.select(&mode).length) == count}
+  end
+
   def where(*conditions)
     methods_to_transform = []
     origins.each do |origin|
