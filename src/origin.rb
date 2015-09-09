@@ -7,6 +7,14 @@ class Origin
     proc { |_, method| method.match(regex) }
   end
 
+  def is_public
+    proc { |origin, method| origin.aspects_target.public_instance_methods.include?(method)}
+  end
+
+  def is_private
+    proc { |origin, method| origin.aspects_target.private_instance_methods.include?(method)}
+  end
+
   def where(*conditions)
     methods_to_transform = []
     origins.each do |origin|

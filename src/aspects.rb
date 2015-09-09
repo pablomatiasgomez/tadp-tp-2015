@@ -11,7 +11,7 @@ class Aspects
 
     origins = []
 
-    args.map do |possible_origin|
+    possible_origins.map do |possible_origin|
       possible_origin.is_a?(Regexp) ? origins+= regex_to_origins(possible_origin) : origins+= [possible_origin]
     end
 

@@ -1,6 +1,6 @@
 class Object
   def get_origin_methods
-    aspects_target.instance_methods.map { |method| [self,method ] }
+    ((aspects_target.instance_methods)+(aspects_target.private_instance_methods)).map { |method| [self,method ] }
   end
 
   def aspects_target

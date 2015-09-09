@@ -3,7 +3,7 @@ require_relative '../src/aspects.rb'
 
 describe 'Origins conditions' do
 
-  let(:an_object) {Object.new}
+  let(:object_instance_methods) {Object.instance_methods+Object.private_instance_methods}
 
   let(:no_condition) {
     (Aspects.on Object do
@@ -17,14 +17,32 @@ describe 'Origins conditions' do
     end).map { |_, m| m}
   }
 
+  let(:public_condition) {
+    (Aspects.on Object do
+      where is_public
+    end).map { |_, m| m}
+  }
+
+  let(:private_condition) {
+    (Aspects.on Object do
+      where is_private
+    end).map { |_, m| m}
+  }
+
   it 'should get the instance methods of Object' do
-    expect(no_condition).to eq(Object.instance_methods)
-    expect(no_condition).to eq(an_object.methods)
+    expect(no_condition).to eq(object_instance_methods)
   end
 
-  it 'should get the instnce methods of Object beginning with a' do
-    expect(name_condition).to eq(Object.instance_methods.grep(/^a.*/))
-    expect(name_condition).to eq(an_object.methods.grep(/^a.*/))
+  it 'should get the instance methods of Object beginning with a' do
+    expect(name_condition).to eq(object_instance_methods.grep(/^a.*/))
+  end
+
+  it 'should get the instance public methods of Object' do
+    expect(public_condition).to eq(Object.public_instance_methods)
+  end
+
+  it 'should get the instance private methods of Object' do
+    expect(private_condition).to eq(Object.private_instance_methods)
   end
 
 end
