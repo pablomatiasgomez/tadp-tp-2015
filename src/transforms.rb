@@ -33,7 +33,7 @@ class UnboundMethod
   end
 
   def instead_of(&new_method)
-    proc { |instance, *parameters| instance_exec(self, *parameters, &new_method) }
+    proc { |*parameters| instance_exec(self, *parameters, &new_method) }
   end
 
 end

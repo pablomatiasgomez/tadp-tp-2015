@@ -96,14 +96,14 @@ describe 'Origin Transforms' do
       Aspects.on SarlompaClass do
         transform(where name ( /m3/ )) do
           instead_of do |instance , *args|
-            @x=123
+            @x=123 + args.at(0)
             instance.x
           end
         end
       end
 
-      expect(sarlompa.m3(10)).to be(123)
-      expect(sarlompa.x).to be(123)
+      expect(sarlompa.m3(10)).to be(133)
+      expect(sarlompa.x).to be(133)
     end
 
   end
