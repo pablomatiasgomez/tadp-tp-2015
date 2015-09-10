@@ -7,10 +7,6 @@ class Object
     aspects_target.instance_method(method_sym)
   end
 
-  def transform_method(method_sym, &transform)
-    aspects_target.send( define_method(method_sym)  )
-  end
-
   def aspects_target
     singleton_class
   end

@@ -71,7 +71,7 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(sarlompa.m1(1, 2)).to be(30)
+      expect(sarlompa.m1(1, 2)).to be(12)
       expect(sarlompa.x).to be(10)
     end
 
@@ -104,6 +104,24 @@ describe 'Origin Transforms' do
 
       expect(sarlompa.m3(10)).to be(133)
       expect(sarlompa.x).to be(133)
+    end
+
+  end
+
+  context 'Combined Transforms' do
+
+    it 'should' do
+      Aspects.on B do
+        transform(where name(/say_hi/)) do
+          inject(x: "Tarola")
+          instead_of do |instance, *args|
+          args[0]+="!"
+          "Bye Bye, #{args[0]}"
+          end
+        end
+      end
+
+      expect(B.new.say_hi("World")).to eq("Bye Bye, Tarola!")
     end
 
   end
