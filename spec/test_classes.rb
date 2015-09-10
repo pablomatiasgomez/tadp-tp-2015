@@ -37,3 +37,15 @@ class MyClass
     p2 + ':' + ppp
   end
 end
+
+class A
+  def say_hi(x)
+    "Hi, "+x
+  end
+end
+
+class B
+  def say_hi(x)
+    "Bye Bye, "+x
+  end
+end

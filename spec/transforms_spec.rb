@@ -42,4 +42,18 @@ describe 'Origin Transforms' do
 
   end
 
+  context 'Redirect Transform' do
+
+    it 'should redirect Hi World to Bye Bye World' do
+    Aspects.on A do
+      transform( where name(/say_hi/)) do
+        redirect_to(B.new)
+      end
+    end
+
+    expect(A.new.say_hi("World")).to eq("Bye Bye, World")
+    end
+
+  end
+
 end

@@ -13,4 +13,9 @@ class UnboundMethod
       method.bind(self).call(*params) }
   end
 
+  def redirect_to(one_object)
+    method = self
+    proc{ |*params| one_object.send(method.name, *params) }
+  end
+
 end
