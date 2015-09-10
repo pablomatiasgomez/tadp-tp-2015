@@ -28,3 +28,12 @@ module TestModule
   def foo3(p1, p2, p3)
   end
 end
+
+class MyClass
+  def do_something(p1, p2)
+    p1 + '-' + p2
+  end
+  def do_another_something(p2, ppp)
+    p2 + ':' + ppp
+  end
+end
