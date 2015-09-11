@@ -4,8 +4,8 @@ class Aspects
 
   def self.regex_to_origins(regex)
     Object.constants.grep(regex)
-                    .map {|regex_symbol| Object.const_get(regex_symbol)}
-                    .select{|constant|constant.is_a?(Class ) || constant.is_a?(Module)}
+                    .map(&Object.method(:const_get))
+                    .grep(Module)
   end
 
   def self.find_origins(*possible_origins)
