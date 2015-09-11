@@ -26,7 +26,7 @@ class Origin
   end
 
   def neg(condition)
-    proc { |origin_method| !(condition.call(origin_method)) }
+    proc { |origin,method| !(condition.call(origin,method)) }
   end
 
 end

@@ -10,7 +10,7 @@ class Origin
 
   def where(*conditions)
     get_origin_methods(origin).select { |origin_method|
-      conditions.all? {|condition| condition.call(origin_method)}
+      conditions.all? {|condition| condition.call(origin,origin_method)}
     }
   end
 
@@ -27,7 +27,7 @@ class Origin
   end
 
   def get_origin_methods(origin)
-    ((aspects_target(origin).instance_methods)+(aspects_target(origin).private_instance_methods)).map { |method| [origin,method ] }
+    (aspects_target(origin).instance_methods)+(aspects_target(origin).private_instance_methods)
   end
 
   def origin_method(origin, method_sym)
