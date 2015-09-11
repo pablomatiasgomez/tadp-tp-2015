@@ -29,7 +29,7 @@ describe 'Origins Find' do
   end
 
   it 'should raise Error: Empty Origin' do
-    expect { Aspects.find_origins }.to raise_error(RuntimeError, 'Error: Empty Origin')
+    expect { Aspects.find_origins }.to raise_exception(EmptyOriginException)
   end
 
 end
