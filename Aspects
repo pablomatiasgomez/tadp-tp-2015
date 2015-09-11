@@ -1,0 +1,77 @@
+load 'Transformable'
+class Aspects
+  def self.on(*args,&closure)
+
+    aspectables = encontrarAspectables(*args)
+
+    throw(ArgumentError,"Origen Vacio") if aspectables.size==0
+
+    aplicarAspectos(aspectables,&closure)
+
+  end
+
+  def self.encontrarAspectables(*parametros)
+    parametros.grep(Regexp).map(&:toAspectable).reduce(parametros.grepv(Regexp)){|acum,coso|coso+acum}
+  end
+
+  def self.aplicarAspectos(parametros,&closure)
+    parametros.each do |arg|
+      (arg.instance_eval &closure)
+    end
+  end
+end
+
+
+module Aspectable
+
+  def self.define_known_method_to_object(method_name,related_class)
+    define_method(method_name){|*parameters,&block| related_class.new(*parameters,&block)}
+  end
+
+  def toAspectable
+    self
+  end
+
+  def where(*conditions)
+    puts metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}.to_s
+    metodos.select{|metodo|conditions.all?{|condicion|condicion.esCumplida(metodo,self)}}
+  end
+
+  def transform(methods,&transformation)
+    puts methods.each {|method| Transformable.new(self,method).instance_eval &transformation}
+  end
+
+  def call_in_context(method,*arguments,&block)
+    define_method_target.send(method,*arguments,&block)
+  end
+
+  define_method(:define){|method,&closure|call_in_context(:define_method,method,&closure)}
+  define_method(:metodos){call_in_context(:instance_methods) + call_in_context(:private_instance_methods)}
+  define_method(:metodo){|method|call_in_context(:instance_method,method)}
+  define_method(:espublico?){|method| call_in_context(:public_instance_methods).include?(method)}
+  define_method(:esprivado?){|method|  call_in_context(:private_instance_methods).include?(method)}
+  define_method(:alias){|new_name,old_name|call_in_context(:alias_method, new_name, old_name)}
+
+end
+
+module ConcreteAspectable
+  include Aspectable
+
+def define_method_target
+  singleton_class
+end
+
+end
+
+module AbstractAspectable include Aspectable
+
+def define_method_target
+  self
+end
+
+end
+
+
+load 'ClasesExtendidas'
+load 'Condiciones'
+load 'MethodReflector'

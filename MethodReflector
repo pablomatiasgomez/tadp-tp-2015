@@ -1,0 +1,14 @@
+class ReflectedMethod
+    attr_accessor :method_name,:parameters,:block
+      def initialize(method_name,*parameters,&block)
+        @method_name=method_name
+        @parameters=parameters
+        @block=block
+     end
+end
+
+module MethodReflector
+  def define_method_reflector(method_name)
+    define_method(method_name) {|*parameters,&block| ReflectedMethod.new(method_name,*parameters,&block)}
+  end
+end

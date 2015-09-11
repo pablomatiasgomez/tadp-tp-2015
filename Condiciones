@@ -1,0 +1,105 @@
+class Condicion
+end
+class Visibilidad < Condicion
+end
+class EsPublico < Visibilidad
+end
+class EsPrivado < Visibilidad
+end
+class Selector < Condicion
+end
+class CondicionParametros
+end
+class CondicionParametrosCreator
+end
+class CantParametros < CondicionParametros
+end
+class NombreParametros < CondicionParametros
+end
+class Negacion < Condicion
+end
+
+$condiciones = {:nombre => Selector, :is_private => EsPrivado, :is_public => EsPublico, :has_parameters => CondicionParametrosCreator, :neg => Negacion}
+$condiciones.each do |condition,cond_class| Aspectable.define_known_method_to_object(condition,cond_class) end
+
+class Condicion
+  def esCumplida(unMetodo)
+  end
+end
+
+
+
+class Visibilidad < Condicion
+  def esCumplida(unMetodo,poseedorDelMetodo)
+    poseedorDelMetodo.send(self.class.to_s.downcase+"?",unMetodo)
+  end
+end
+
+class EsPrivado < Visibilidad
+end
+
+class EsPublico < Visibilidad
+end
+
+
+
+
+
+class Selector < Condicion
+
+  def initialize(unaExp)
+    @regexp=unaExp
+  end
+  def esCumplida(unMetodo,poseedorDelMetodo)
+    @regexp.match(unMetodo)
+  end
+end
+
+
+$tiposParametros = {:mandatory=>proc{|modo|modo==:req},:optional=>proc{|modo|modo==:opt},:both=>proc{true}}
+$tiposParametros.each{|symbol,condition| Aspectable.send(:define_method,symbol){condition}}
+
+
+
+class CondicionParametrosCreator #Atado horriblemente con alambre
+  def self.new(unaCant,unParametro=$tiposParametros[:both])
+    (unParametro.is_a?Regexp) ? NombreParametros.new(unaCant,unParametro) : CantParametros.new(unaCant,unParametro)
+  end
+end
+
+class CondicionParametros
+  attr_reader :cant
+  def esCumplida(method,method_owner)
+    method_owner.metodo(method).parameters.count(&condition)==cant
+  end
+end
+
+class CantParametros < CondicionParametros
+  def initialize(unaCant,unModo=$tiposParametros[:both])
+    @cant=unaCant
+    @modo=unModo
+  end
+  def condition
+    proc {|modoParam|@modo.call(modoParam)}
+  end
+end
+
+class NombreParametros < CondicionParametros
+    def initialize(unaCant,unNombre)
+    @cant=unaCant
+    @nombre=unNombre
+    end
+  def condition
+    proc {|_,nomParam|@nombre.match(nomParam)}
+  end
+end
+
+
+class Negacion < Condicion
+    def initialize(*conditions)
+      @conditions=conditions
+    end
+    def esCumplida(method,method_owner)
+      @conditions.none?{|condition|condition.esCumplida(method,method_owner)}
+    end
+end

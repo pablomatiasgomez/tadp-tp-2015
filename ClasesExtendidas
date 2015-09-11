@@ -1,0 +1,50 @@
+class Array
+  def grepv(parametroMagico)
+    self-self.grep(parametroMagico)
+  end
+  def select_with_index(&block)
+    each_with_index.select(&block)
+  end
+end
+
+class Regexp
+  def toAspectable
+    (Object.clases+Object.modulos).uniq
+        .select{|const|const.to_s.match(self)}
+  end
+end
+
+class Object
+  include ConcreteAspectable
+  def self.clases
+    constantesQueSon(Class)
+  end
+  def self.modulos
+    constantesQueSon(Module)
+  end
+  def self.constantesQueSon(unTipo)
+    constants .map(&Object.method(:const_get))
+        .grep(unTipo)
+  end
+
+end
+
+class Method
+  def parameter_names
+    parameters.map{|_,name|name}
+  end
+end
+
+class UnboundMethod
+  def parameter_names
+    parameters.map{|_,name|name}
+  end
+end
+
+class Class
+  include AbstractAspectable
+end
+
+class Module
+  include AbstractAspectable
+end
