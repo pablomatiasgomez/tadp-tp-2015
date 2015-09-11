@@ -18,9 +18,11 @@ class Aspects
   end
 
   def self.on(*possible_origins, &block)
-    origin = Origin.new
-    origin.origins= find_origins(*possible_origins)
-    origin.instance_eval &block
+    origins = find_origins(*possible_origins)
+    origins.flat_map do |origin|
+      Origin.new(origin).instance_eval &block
+    end
   end
+
 
 end

@@ -2,28 +2,23 @@ require_relative 'conditions.rb'
 require_relative 'transforms.rb'
 
 class Origin
-  attr_accessor :origins, :methods_to_transform
+  attr_accessor :origin
+
+  def initialize(origin)
+    @origin=origin
+  end
 
   def where(*conditions)
-    @methods_to_transform= []
-    origins.each do |origin|
-      @methods_to_transform+= get_origin_methods(origin)
-    end
-
-    methods_to_transform.select! do |origin_method|
-      conditions.all? do |condition|
-        condition.call(origin_method)
-      end
-    end
-
-    methods_to_transform
+    get_origin_methods(origin).select { |origin_method|
+      conditions.all? {|condition| condition.call(origin_method)}
+    }
   end
 
   def transform(origin_methods, &block)
-    origin_methods.each do |origin, method|
+    origin_methods.each do |method|
       optimus_prime = Transformer.new(origin_method(origin, method))
       optimus_prime.instance_eval &block
-      aspects_target(origin).send(:define_method, method, &(optimus_prime.transform_method))
+      define_origin_method(origin,method,&(optimus_prime.transform_method))
     end
   end
 
@@ -45,6 +40,10 @@ class Origin
 
   def private_origin_method(origin)
     aspects_target(origin).private_instance_methods
+  end
+
+  def define_origin_method(origin,method_name,&logic)
+    aspects_target(origin).send(:define_method, method_name, &logic)
   end
 
 end
