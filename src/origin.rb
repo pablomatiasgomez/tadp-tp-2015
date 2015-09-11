@@ -34,16 +34,26 @@ class Origin
     aspects_target(origin).instance_method(method_sym)
   end
 
-  def public_origin_method(origin)
+  def public_origin_methods(origin)
     aspects_target(origin).public_instance_methods
   end
 
-  def private_origin_method(origin)
+  def private_origin_methods(origin)
     aspects_target(origin).private_instance_methods
   end
 
   def define_origin_method(origin,method_name,&logic)
     aspects_target(origin).send(:define_method, method_name, &logic)
   end
+
+# Alternativa Aserrin con dulce de leche (Casi Superadora)
+# { :origin_method => :instance_method,
+#   :public_origin_methods => :public_instance_methods,
+#   :private_origin_methods => :private_instance_methods,
+#   :define_origin_method => :define_method}.each_pair do |my_method, original_method|
+#   define_method(my_method) do |origin,*parameters,&block|
+#     aspects_target(origin).send(original_method,*parameters,&block)
+#   end
+# end
 
 end

@@ -5,11 +5,11 @@ class Origin
   end
 
   def is_public
-    proc { |origin, method| public_origin_method(origin).include?(method) }
+    proc { |origin, method| public_origin_methods(origin).include?(method) }
   end
 
   def is_private
-    proc { |origin, method| private_origin_method(origin).include?(method)}
+    proc { |origin, method| private_origin_methods(origin).include?(method)}
   end
 
   def mandatory #Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
