@@ -5,14 +5,14 @@ class Origin
   end
 
   def is_public
-    proc { |origin, method| public_origin_methods(origin).include?(method) }
+    proc { |origin, method| origin_public_methods(origin).include?(method) }
   end
 
   def is_private
-    proc { |origin, method| private_origin_methods(origin).include?(method)}
+    proc { |origin, method| origin_private_methods(origin).include?(method)}
   end
 
-  def mandatory #Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
+  def mandatory #TODO Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
     proc { |mode, _| mode == :req }
   end
 
@@ -21,7 +21,7 @@ class Origin
   end
 
   def has_parameters(count, mode = proc {|p| p})
-    condition = mode.is_a?(Regexp) ? proc {|_, p| p.nil? ? false : p.match(mode)} : mode
+    condition = mode.is_a?(Regexp) ? proc {|_, p| mode.match(p)} : mode
     proc { |origin, method| origin_method(origin, method).parameters.count(&condition) == count }
   end
 
