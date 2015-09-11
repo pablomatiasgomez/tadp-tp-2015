@@ -5,11 +5,11 @@ class Origin
   end
 
   def is_public
-    proc { |origin, method| origin.aspects_target.public_instance_methods.include?(method) }
+    proc { |origin, method| public_origin_method(origin).include?(method) }
   end
 
   def is_private
-    proc { |origin, method| origin.aspects_target.private_instance_methods.include?(method)}
+    proc { |origin, method| private_origin_method(origin).include?(method)}
   end
 
   def mandatory #Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
@@ -22,9 +22,9 @@ class Origin
 
   def has_parameters(count, mode = proc {|p| p})
     if mode.is_a?(Regexp)
-      proc { |origin, method| (origin.origin_method(method).parameters.select{ |_, p| p.nil? ? false : p.match(mode) }.length) == count }
+      proc { |origin, method| (origin_method(origin, method).parameters.select{ |_, p| p.nil? ? false : p.match(mode) }.length) == count }
     else
-      proc { |origin, method| (origin.origin_method(method).parameters.select(&mode).length) == count }
+      proc { |origin, method| (origin_method(origin, method).parameters.select(&mode).length) == count }
     end
   end
 
