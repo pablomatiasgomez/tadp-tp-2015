@@ -16,6 +16,8 @@ class Origin
         condition.call(origin_method)
       end
     end
+
+    methods_to_transform
   end
 
   def transform(origin_methods, &block)
