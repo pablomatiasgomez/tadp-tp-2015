@@ -16,19 +16,14 @@ class Origin
         condition.call(origin_method)
       end
     end
-
-    methods_to_transform
   end
 
   def transform(origin_methods, &block)
-
     origin_methods.each do |origin, method|
       optimus_prime = Transformer.new(origin.origin_method(method))
       optimus_prime.instance_eval &block
       origin.aspects_target.send(:define_method, method, &(optimus_prime.transform_method))
-
     end
-
   end
 
 end

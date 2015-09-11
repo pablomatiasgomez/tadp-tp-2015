@@ -1,6 +1,5 @@
 require_relative 'origin.rb'
 
-
 class Aspects
 
   def self.regex_to_origins(regex)
@@ -8,7 +7,6 @@ class Aspects
   end
 
   def self.find_origins(*possible_origins)
-
     origins = []
 
     possible_origins.map do |possible_origin|
@@ -16,13 +14,11 @@ class Aspects
     end
 
     origins.empty? ? (raise 'Error: Empty Origin') : origins.uniq
-
   end
 
   def self.on(*possible_origins, &block)
     origin = Origin.new
     origin.origins= find_origins(*possible_origins)
-
     origin.instance_eval &block
   end
 

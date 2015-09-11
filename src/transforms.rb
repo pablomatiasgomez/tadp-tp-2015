@@ -16,7 +16,7 @@ class Transformer
     before_method=@before_method
     after_method=@after_method
 
-    proc {|*parameters|
+    proc { |*parameters|
       method= method.is_a?(UnboundMethod) ? method.bind(self) : method
       inject_hash.each do |key, value|
         index_to_insert = original_method.parameters.find_index { |_, p| p == key }
