@@ -21,11 +21,8 @@ class Origin
   end
 
   def has_parameters(count, mode = proc {|p| p})
-    if mode.is_a?(Regexp)
-      proc { |origin, method| (origin_method(origin, method).parameters.select{ |_, p| p.nil? ? false : p.match(mode) }.length) == count }
-    else
-      proc { |origin, method| (origin_method(origin, method).parameters.select(&mode).length) == count }
-    end
+    condition = mode.is_a?(Regexp) ? proc {|_, p| p.nil? ? false : p.match(mode)} : mode
+    proc { |origin, method| origin_method(origin, method).parameters.count(&condition) == count }
   end
 
   def neg(condition)
