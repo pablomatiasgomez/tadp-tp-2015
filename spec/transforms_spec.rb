@@ -30,6 +30,14 @@ describe 'Origin Transforms' do
       expect(mi_class_instance.do_another_something("foo", "foo")).to eq("bar:foo")
     end
 
+    it 'should BOOM raising NoParameterException' do
+      expect {Aspects.on MyClass do
+                transform( where has_parameters(1, /p2/)) do
+                  inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
+                end
+              end }.to raise_exception(NoParameterException)
+    end
+
     it 'should print foo-bar and the proc (selector->old_parameter)' do
       Aspects.on MyClass do
         transform( where has_parameters(1, /p2/)) do
