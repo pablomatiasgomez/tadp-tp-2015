@@ -79,7 +79,7 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(sarlompa.m1(1, 2)).to be(12)
+      expect(sarlompa.m1(1, 2)).to be(30)
       expect(sarlompa.x).to be(10)
     end
 
