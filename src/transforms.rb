@@ -10,12 +10,13 @@ class Transformer
   end
 
   def transform_method
+
     transformations=@transformations
     method=@method
     proc { |*args|
       method = method.bind(self) if method.is_a?(UnboundMethod)
       instance_exec(*args,&transformations.reverse.reduce(method){|method,transformation|instance_exec(method,&transformation)})
-    }
+}
   end
 
   def add_transformation(&transformation)
@@ -54,6 +55,7 @@ class Transformer
       instance_exec(self,tying_with_wire_proc,*args,&logic)
     }
   end
+
 
   def after(&logic)
     add_transformation{|next_method,*args|

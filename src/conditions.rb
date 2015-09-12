@@ -1,15 +1,15 @@
-class Origin
+module Conditions
 
   def name(regex)
     proc { |_, method| method.match(regex) }
   end
 
   def is_public
-    proc { |origin, method| origin_public_methods(origin).include?(method) }
+    proc { |target_origin, method| target_origin.public_instance_methods.include?(method) }
   end
 
   def is_private
-    proc { |origin, method| origin_private_methods(origin).include?(method)}
+    proc { |target_origin, method| target_origin.private_instance_methods.include?(method)}
   end
 
   def mandatory #TODO Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
@@ -22,11 +22,11 @@ class Origin
 
   def has_parameters(count, mode = proc {|p| p})
     condition = mode.is_a?(Regexp) ? proc {|_, p| mode.match(p)} : mode
-    proc { |origin, method| origin_method(origin, method).parameters.count(&condition) == count }
+    proc { |target_origin, method| target_origin.instance_method(method).parameters.count(&condition) == count }
   end
 
   def neg(condition)
-    proc { |origin,method| !(condition.call(origin,method)) }
+    proc { |target_origin,method| !(condition.call(target_origin,method)) }
   end
 
 end
