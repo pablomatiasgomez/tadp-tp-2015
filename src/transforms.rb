@@ -1,11 +1,8 @@
 class Transformer
-  attr_accessor :inject_hash, :before_method, :method, :after_method
+  attr_accessor :original_method, :method, :transformations
 
   def initialize(method_to_transform)
     @original_method = @method = method_to_transform
-    @inject_hash = {}
-    @before_method = nil
-    @after_method = nil
     @transformations = []
   end
 
