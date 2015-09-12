@@ -20,10 +20,10 @@ class Transformer
 
     @origin.send(:define_method, original_method.name) do
       |*parameters|
-      method= method.is_a?(UnboundMethod) ? method.bind(self) : method
+      method = method.bind(self) if method.is_a?(UnboundMethod)
       inject_hash.each do |insert_index, value|
-        value.is_a?(Proc) ? insert_value= value.call(self, original_method.name, parameters.at(insert_index))
-                          : insert_value= value
+        insert_value = value.is_a?(Proc) ? value.call(self, original_method.name, parameters.at(insert_index))
+                                         : value
         parameters[insert_index] = insert_value
       end
 
@@ -51,7 +51,7 @@ class Transformer
   def before(&before_code)
     method = @method
     @before_method = proc{ |*parameters|
-                      method= method.is_a?(UnboundMethod) ? method.bind(self) : method
+                      method = method.bind(self) if method.is_a?(UnboundMethod)
                       cont = proc { |_, _, *new_parameters| method.call(*new_parameters)}
                       instance_exec(self, cont, *parameters, &before_code) }
   end
