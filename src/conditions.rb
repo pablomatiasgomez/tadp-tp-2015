@@ -25,7 +25,7 @@ module Conditions
     proc { |target_origin, method| target_origin.instance_method(method).parameters.count(&condition) == count }
   end
 
-  def neg(condition)
+  def neg(condition)#TODO puede recibir mas de una condicion
     proc { |target_origin,method| !(condition.call(target_origin,method)) }
   end
 

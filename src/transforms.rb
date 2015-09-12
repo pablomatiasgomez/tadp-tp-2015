@@ -20,7 +20,7 @@ class Transformer
       inject_hash.each do |insert_index, value|
         value.is_a?(Proc) ? insert_value= value.call(self, original_method.name, parameters.at(insert_index))
                           : insert_value= value
-        parameters.insert(insert_index,insert_value).delete_at(insert_index+1)
+        parameters[insert_index] = insert_value
       end
 
       #Adoptada convencion de que si esta el before, TIENE QUE llamar al otro metodo

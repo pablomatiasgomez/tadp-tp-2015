@@ -14,6 +14,7 @@ class Origin
   end
 
   def transform(origin_methods, &block)
+    #TODO pasar eso a Transfomer, que no se genere una isntancia
     origin_methods.each do |method|
       optimus_prime = Transformer.new(target_origin.instance_method(method))
       optimus_prime.instance_eval &block
