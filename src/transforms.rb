@@ -1,23 +1,27 @@
 class Transformer
-  attr_accessor :original_method, :method, :transformations
+  attr_accessor :origin, :original_method, :method, :transformations
 
-  def initialize(method_to_transform)
-    @original_method = @method = method_to_transform
+  def initialize(origin, method_to_transform)
+    @origin = origin
+    @original_method = @method = origin.instance_method(method_to_transform)
     @transformations = []
   end
 
-  def transform_method
+  def transform_method(&transforms)
+    instance_eval &transforms
 
     transformations=@transformations
     method=@method
-    proc { |*args|
+
+    @origin.send(:define_method, @original_method.name) do
+      |*args|
       method = method.bind(self) if method.is_a?(UnboundMethod)
-      instance_exec(*args,&transformations.reverse.reduce(method){|method,transformation|instance_exec(method,&transformation)})
-}
+      instance_exec(*args,&transformations.reverse.reduce(method) { |method,transformation|instance_exec(method,&transformation) })
+      end
   end
 
   def add_transformation(&transformation)
-    @transformations << proc {|next_method| proc{|*args| instance_exec(next_method,*args,&transformation)}}
+    @transformations << proc { |next_method| proc{|*args| instance_exec(next_method,*args,&transformation) } }
   end
 
   def replace_method(&new_method)
@@ -25,7 +29,7 @@ class Transformer
   end
 
   def inject(hash)
-    method_parameter_names=@original_method.parameters.map{|_,n|n}
+    method_parameter_names=@original_method.parameters.map { |_,n| n }
     method_name=@original_method.name
     hash.keys.each{|key|
       unless method_parameter_names.include?key
@@ -34,22 +38,20 @@ class Transformer
       }
 
     add_transformation{|next_method,*args|
-    method_parameter_names.each_with_index{|nombre,index|
+    method_parameter_names.each_with_index { |nombre,index|
       if hash.key?(nombre)
         args[index]=(hash[nombre].is_a?Proc) ? hash[nombre].call(self,method_name,args[index]) : hash[nombre]
       end
     }
+
     instance_exec(*args,&next_method)
     }
   end
 
   def before(&logic)
     add_transformation{|next_method,*args|
-      #No entiendo que seria lo que se le manda a cont en los ejemplos de la pagina al usar before, en ambos se manda
-      #(self,nil,*parametros), pareciera indicar que los primeros no son necesarios. Aparte, si cont es el metodo
-      #original,y le mando dos cosas aparte de todos los parametros que recibe,explota por mandar demasiados parametros
-      tying_with_wire_proc = proc {|_,_,*new_parameters| instance_exec(*new_parameters,&next_method)}
-      instance_exec(self,tying_with_wire_proc,*args,&logic)
+      cont = proc { |_,_,*new_parameters| instance_exec(*new_parameters,&next_method)}
+      instance_exec(self, cont, *args, &logic)
     }
   end
 
@@ -62,14 +64,12 @@ class Transformer
   end
 
   def instead_of(&logic)
-    replace_method {|*args|
-      instance_exec(self,*args,&logic)
-    }
+    replace_method { |*args| instance_exec(self,*args,&logic) }
   end
 
   def redirect_to(target)
     method_name=@original_method.name
-    replace_method {|*args|target.send(method_name,*args)}
+    replace_method { |*args|target.send(method_name,*args) }
   end
 
 end
