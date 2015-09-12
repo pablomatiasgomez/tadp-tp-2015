@@ -12,12 +12,16 @@ module Conditions
     proc { |target_origin, method| target_origin.private_instance_methods.include?(method)}
   end
 
+  def is_mode(sym)
+    proc { |mode, _| mode == sym }
+  end
+
   def mandatory
-    proc { |mode, _| mode == :req }
+    is_mode(:req)
   end
 
   def optional
-    proc { |mode, _| mode == :opt }
+    is_mode(:opt)
   end
 
   def has_parameters(count, mode = proc {|p| p})
