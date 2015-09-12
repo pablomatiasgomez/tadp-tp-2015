@@ -2,7 +2,7 @@ require_relative 'conditions.rb'
 require_relative 'transforms.rb'
 
 class Origin
-  include WithCondition
+  include Conditions
   attr_accessor :target_origin
 
   def initialize(origin)
@@ -28,4 +28,16 @@ class Origin
   def origin_methods(target_origin)
     (target_origin.instance_methods)+(target_origin.private_instance_methods)
   end
+
+
+  # Alternativa Aserrin con dulce de leche (Casi Superadora)
+  # { :origin_method => :instance_method,
+  #   :origin_public_methods => :public_instance_methods,
+  #   :origin_private_methods => :private_instance_methods,
+  #   :origin_define_method => :define_method}.each_pair do |my_method, original_method|
+  #   define_method(my_method) do |origin,*parameters,&block|
+  #     aspects_target(origin).send(original_method,*parameters,&block)
+  #   end
+  # end
+
 end

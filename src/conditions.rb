@@ -1,4 +1,4 @@
-module WithCondition
+module Conditions
 
   def name(regex)
     proc { |_, method| method.match(regex) }
