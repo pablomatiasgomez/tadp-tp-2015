@@ -15,14 +15,11 @@ class Aspects
   end
 
   def self.on(*possible_origins, &block)
-    origins = find_origins(*possible_origins)
-    origins.flat_map do |origin|
-      Origin.new(origin).instance_eval &block
-    end
+    find_origins(*possible_origins).flat_map { |origin| Origin.new(origin).instance_eval &block }
   end
 
 end
 
-
 class EmptyOriginException < Exception
+
 end
