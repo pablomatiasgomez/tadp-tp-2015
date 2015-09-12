@@ -12,12 +12,24 @@ module Conditions
     proc { |target_origin, method| target_origin.private_instance_methods.include?(method)}
   end
 
-  def mandatory #TODO Preguntar porque no me toma en consola si lo meto adentro de has_parameter y si en los tests
-    proc { |mode, _| mode == :req }
+  #Alternativa Aserrin Con Dulce de Leche v2.0
+  # ["public","private"].each do
+  # |visibility|
+  #   define_method("is_#{visibility}") do
+  #     proc{ |target_origin,method| target_origin.send("#{visibility}_instance_methods").include? method }
+  #   end
+  # end
+
+  def is_mode(sym)
+    proc { |mode, _| mode == sym }
+  end
+
+  def mandatory
+    is_mode(:req)
   end
 
   def optional
-    proc { |mode, _| mode == :opt }
+    is_mode(:opt)
   end
 
   def has_parameters(count, mode = proc {|p| p})
@@ -25,8 +37,8 @@ module Conditions
     proc { |target_origin, method| target_origin.instance_method(method).parameters.count(&condition) == count }
   end
 
-  def neg(condition)
-    proc { |target_origin,method| !(condition.call(target_origin,method)) }
+  def neg(*conditions)
+    proc { |target_origin,method| conditions.none? { |condition| condition.call(target_origin,method) } }
   end
 
 end
