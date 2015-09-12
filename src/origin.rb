@@ -13,13 +13,8 @@ class Origin
     origin_methods(target_origin).select { |origin_method| conditions.all? {|condition| condition.call(target_origin,origin_method)} }
   end
 
-  def transform(origin_methods, &block)
-    #TODO pasar eso a Transfomer, que no se genere una isntancia
-    origin_methods.each do |method|
-      optimus_prime = Transformer.new(target_origin.instance_method(method))
-      optimus_prime.instance_eval &block
-      target_origin.send(:define_method, method, &(optimus_prime.transform_method))
-    end
+  def transform(origin_methods, &transforms)
+    origin_methods.each { |method| Transformer.new(target_origin, method).transform_method &transforms }
   end
 
   def aspects_target(origin)
@@ -29,7 +24,6 @@ class Origin
   def origin_methods(target_origin)
     (target_origin.instance_methods)+(target_origin.private_instance_methods)
   end
-
 
   # Alternativa Aserrin con dulce de leche (Casi Superadora)
   # { :origin_method => :instance_method,
