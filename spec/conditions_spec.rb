@@ -130,10 +130,10 @@ describe 'Origins Conditions' do
 
    it 'should get foo2 and foo3 (both do not have 1 parameter)' do
      neg_condition = (Aspects.on TestModule do
-                       where name(/foo\d/), neg(has_parameters(1))
+                       where name(/foo\d/), neg(has_parameters(1), name(/foo2/))
                      end)
 
-     expect(neg_condition).to eq([:foo2, :foo3])
+     expect(neg_condition).to eq([:foo3])
    end
 
  end
