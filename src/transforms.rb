@@ -49,10 +49,11 @@ class Transformer
   end
 
   def before(&before_code)
-    method = @original_method
+    method = @method
     @before_method = proc{ |*parameters|
-                      method_proc = proc { |_, _, *new_parameters| method.bind(self).call(*new_parameters)}
-                      instance_exec(self, method_proc, *parameters, &before_code) }
+                      method= method.is_a?(UnboundMethod) ? method.bind(self) : method
+                      cont = proc { |_, _, *new_parameters| method.call(*new_parameters)}
+                      instance_exec(self, cont, *parameters, &before_code) }
   end
 
   def after(&after_code)
