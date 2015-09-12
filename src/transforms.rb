@@ -22,9 +22,13 @@ class Transformer
                           : insert_value= value
         parameters.insert(insert_index,insert_value).delete_at(insert_index+1)
       end
-      instance_exec(*parameters, &before_method) unless before_method.nil?
-      result = instance_exec(*parameters, &method)
-      after_method.nil? ? result : instance_exec(*parameters, &after_method)
+
+      #Adoptada convencion de que si esta el before, TIENE QUE llamar al otro metodo
+      result = before_method.nil?   ? instance_exec(*parameters, &method)
+                                    : instance_exec(*parameters, &before_method)
+
+      after_method.nil?   ? result
+                          : instance_exec(*parameters, &after_method)
     }
   end
 
@@ -45,7 +49,7 @@ class Transformer
     #TODO Preguntar deberia trabajar con las transformacions anteriores (procs) o considerar el original
     method = @original_method
     @before_method = proc{ |*parameters|
-                      method_proc = proc { |who, _, *new_parameters| method.bind(self).call(*new_parameters)}
+                      method_proc = proc { |_, _, *new_parameters| method.bind(self).call(*new_parameters)}
                       instance_exec(self, method_proc, *parameters, &before_code) }
   end
 
