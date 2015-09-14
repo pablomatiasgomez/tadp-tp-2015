@@ -133,48 +133,30 @@ describe 'Origin Transforms' do
     end
 
     it 'asdasd' do
-      class A2
-        def saludar(p1)
-          'hola'+p1
-        end
-      end
-      class B2
-        def saludar(p2)
-          'chau'+p2
-        end
-      end
-
-      Aspects.on B2 do
+       Aspects.on B2 do
         transform(where has_parameters(1, /p2/)) do
           inject(p2: '!')
           redirect_to(A2.new)
         end
       end
-      expect(B2.new.saludar('pepe')).to eq('hola!')
+
+       expect(B2.new.saludar('pepe')).to eq('hola!')
     end
+
   end
 
   context 'Methods with blocks Transforms' do
 
     it 'should redirect not just the arguments but the block' do
-    class A3
-      def hacer_algo(&block)
-        block.call("Estoy en A")
+       Aspects.on A3 do
+        transform(where name(/hacer_algo/)) do
+          redirect_to(B3.new)
+        end
       end
-    end
-    class B3
-      def hacer_algo(&block)
-        block.call("Estoy en B")
-      end
+
+      expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
     end
 
-    Aspects.on A3 do
-      transform(where name(/hacer_algo/)) do
-        redirect_to(B3.new)
-      end
-    end
-    expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
-    end
   end
 
 end
