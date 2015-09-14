@@ -175,6 +175,6 @@ describe 'Origin Transforms' do
     end
     expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
     end
-    end
+  end
 
 end

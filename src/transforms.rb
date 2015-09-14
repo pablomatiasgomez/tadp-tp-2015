@@ -19,7 +19,7 @@ class Transformer
     after_method=@after_method
 
     @origin.send(:define_method, original_method.name) do
-      |*parameters|
+      |*parameters,&block|
       method = method.bind(self) if method.is_a?(UnboundMethod)
       inject_hash.each do |insert_index, value|
         insert_value = value.is_a?(Proc) ? value.call(self, original_method.name, parameters.at(insert_index))
@@ -27,11 +27,11 @@ class Transformer
         parameters[insert_index] = insert_value
       end
 
-      result = before_method.nil? ? instance_exec(*parameters, &method)
-                                  : instance_exec(*parameters, &before_method)
+      result = before_method.nil? ? instance_exec_b(block,*parameters, &method)
+                                  : instance_exec_b(block,*parameters, &before_method)
 
       after_method.nil? ? result
-                        : instance_exec(*parameters, &after_method)
+                        : instance_exec_b(block,*parameters, &after_method)
     end
   end
 
@@ -45,23 +45,23 @@ class Transformer
 
   def redirect_to(one_object)
     method_symbol = @original_method.name
-    @method = proc{ |*parameters| one_object.send(method_symbol, *parameters) }
+    @method = proc{ |*parameters,&block| one_object.send(method_symbol, *parameters,&block) }
   end
 
   def before(&before_code)
     method = @method
-    @before_method = proc{ |*parameters|
+    @before_method = proc{ |*parameters,&block|
                       method = method.bind(self) if method.is_a?(UnboundMethod)
                       cont = proc { |_, _, *new_parameters| method.call(*new_parameters)}
-                      instance_exec(self, cont, *parameters, &before_code) }
+                      instance_exec_b(block,self, cont, *parameters, &before_code) }
   end
 
   def after(&after_code)
-    @after_method = proc { |*parameters| instance_exec(self, *parameters, &after_code)}
+    @after_method = proc { |*parameters,&block| instance_exec_b(block,self, *parameters, &after_code)}
   end
 
   def instead_of(&new_method)
-    @method = proc { |*parameters| instance_exec(self, *parameters, &new_method) }
+    @method = proc { |*parameters,&block| instance_exec_b(block,self, *parameters, &new_method) }
   end
 
 end

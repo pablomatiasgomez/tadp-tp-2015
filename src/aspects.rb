@@ -1,5 +1,18 @@
 require_relative 'origin.rb'
 
+class Object
+  def instance_exec_b(param_block,*args,&posta_block)
+    self.class.send(:define_method,:__juegos_de_azar__,&posta_block)
+    self.class.send(:define_method,:__mujerzuelas__,&param_block)
+    posta_method=self.method(:__juegos_de_azar__)
+    param_method=self.method(:__mujerzuelas__)
+    self.class.send(:remove_method,:__juegos_de_azar__)
+    self.class.send(:remove_method,:__mujerzuelas__)
+    posta_method.call(*args,&param_method)
+  end
+end
+
+
 class Aspects
 
   def self.regex_to_origins(regex)
