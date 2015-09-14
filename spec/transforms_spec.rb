@@ -154,4 +154,27 @@ describe 'Origin Transforms' do
     end
   end
 
+  context 'Methods with blocks Transforms' do
+
+    it 'should redirect not just the arguments but the block' do
+    class A3
+      def hacer_algo(&block)
+        block.call("Estoy en A")
+      end
+    end
+    class B3
+      def hacer_algo(&block)
+        block.call("Estoy en B")
+      end
+    end
+
+    Aspects.on A3 do
+      transform(where name(/hacer_algo/)) do
+        redirect_to(B3.new)
+      end
+    end
+    expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
+    end
+    end
+
 end
