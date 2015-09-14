@@ -1,3 +1,4 @@
+#Conditions
 class Sarasa
   def foo ( p1 , p2 , p3 , p4 = 'a' , p5 = 'b' , p6 = 'c' )
   end
@@ -29,6 +30,8 @@ module TestModule
   end
 end
 
+#Transforms
+#Inject parameters transforms
 class MyClass
   def do_something(p1, p2)
     p1 + '-' + p2
@@ -38,6 +41,7 @@ class MyClass
   end
 end
 
+#Redirect Transform
 class A
   def say_hi(x)
     "Hi, "+x
@@ -50,6 +54,7 @@ class B
   end
 end
 
+#Inject Transform
 class SarlompaClass
   attr_accessor :x
   def m1(x, y)
@@ -60,5 +65,29 @@ class SarlompaClass
   end
   def m3(x)
     @x = x
+  end
+end
+
+#Combined Transforms
+class A2
+  def saludar(p1)
+    'hola'+p1
+  end
+end
+class B2
+  def saludar(p2)
+    'chau'+p2
+  end
+end
+
+#Transforms with blocks
+class A3
+  def hacer_algo(&block)
+    block.call("Estoy en A")
+  end
+end
+class B3
+  def hacer_algo(&block)
+    block.call("Estoy en B")
   end
 end
