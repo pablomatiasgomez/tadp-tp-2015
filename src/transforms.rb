@@ -56,19 +56,18 @@ class Transformer
 
   def before(precedence=1,&logic)
     add_transformation(precedence) {|next_method, *args, &arg_block|
-      cont = proc { |_, _, *new_parameters, &arg_block| instance_exec_b(arg_block, *new_parameters, &next_method) }
-      instance_exec_b(arg_block, self, cont, *args, &logic) }
+      instance_exec_b(arg_block, next_method, *args, &logic) }
   end
 
 
   def after(precedence=1,&logic)
     add_transformation(precedence) { |next_method, *args, &arg_block|
       instance_exec_b(arg_block, *args, &next_method)
-      instance_exec_b(arg_block, self, *args, &logic) }
+      instance_exec_b(arg_block, *args, &logic) }
   end
 
   def instead_of(precedence=0,&logic)
-    add_transformation(precedence) { |_, *args, &arg_block| instance_exec_b(arg_block, self, *args, &logic) }
+    add_transformation(precedence) { |_, *args, &arg_block| instance_exec_b(arg_block, *args, &logic) }
   end
 
   def redirect_to(target,precedence=0)

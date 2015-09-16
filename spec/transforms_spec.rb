@@ -71,10 +71,10 @@ describe 'Origin Transforms' do
     it 'should do the before block before the method' do
       Aspects.on SarlompaClass do
         transform(where name(/m1/)) do
-          before do |instance, cont, *args|
+          before do |cont, *args|
             @x = 10
             new_args = args.map { |arg| arg*10 }
-            cont.call(self ,nil , *new_args)
+            cont.call(*new_args)
           end
         end
       end
@@ -86,7 +86,7 @@ describe 'Origin Transforms' do
     it 'should do the after block after the method' do
       Aspects.on SarlompaClass do
         transform(where name(/m2/)) do
-          after do |instance, *args|
+          after do |*args|
             if @x > 100
               2*@x
             else
@@ -103,9 +103,9 @@ describe 'Origin Transforms' do
     it 'should get 123 instead of the result of m3' do
       Aspects.on SarlompaClass do
         transform(where name ( /m3/ )) do
-          instead_of do |instance , *args|
+          instead_of do | *args|
             @x=123 + args.at(0)
-            instance.x
+            self.x
           end
         end
       end
@@ -122,7 +122,7 @@ describe 'Origin Transforms' do
       Aspects.on B do
         transform(where name(/say_hi/)) do
           inject(x: "Tarola")
-          instead_of do |instance, *args|
+          instead_of do | *args|
           args[0]+="!"
           "Bye Bye, #{args[0]}"
           end
