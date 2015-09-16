@@ -14,11 +14,12 @@ class Transformer
     instance_eval &transforms
 
     transformations = @transformations
-    method = @method
+    original_method = @method
 
     @origin.send(:define_method, @original_method.name) do
       |*args, &arg_block|
-      method = method.bind(self) if method.is_a?(UnboundMethod)
+      method = original_method.clone.bind(self) if original_method.is_a?(UnboundMethod)
+      puts eval("self",method.to_proc.binding)
       instance_exec_b(arg_block, *args, &transformations.compact.flatten.reduce(method) {
                                    |method, transformation, &arg_block|instance_exec_b(arg_block, method, &transformation) })
       end
