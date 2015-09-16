@@ -1,11 +1,11 @@
 require_relative 'object_extension.rb'
 
 class Transformer
-  attr_accessor :origin, :original_method, :method, :transformations
+  attr_accessor :origin, :original_method, :transformations
 
   def initialize(origin, method_to_transform)
     @origin = origin
-    @original_method = @method = origin.instance_method(method_to_transform)
+    @original_method = origin.instance_method(method_to_transform)
     @transformations = []
     @transformations.define_singleton_method(:[]){|n| super(n) || self[n]=[]}
   end
@@ -13,20 +13,23 @@ class Transformer
   def transform_method(&transforms)
     instance_eval &transforms
 
-    transformations = @transformations
-    original_method = @method
+    transformations = self.transformations
+    original_method = self.original_method
 
-    @origin.send(:define_method, @original_method.name) do
-      |*args, &arg_block|
-      method = original_method.clone.bind(self) if original_method.is_a?(UnboundMethod)
-      puts eval("self",method.to_proc.binding)
-      instance_exec_b(arg_block, *args, &transformations.compact.flatten.reduce(method) {
-                                   |method, transformation, &arg_block|instance_exec_b(arg_block, method, &transformation) })
-      end
+    @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
+      base_method = original_method.clone.bind(self)
+      transformed_method = transformations.reduce(base_method){ |method, transformation| transformation.call(method) }
+      instance_exec_b(arg_block, *args, &transformed_method)
+    end
   end
 
   def add_transformation(precedence, &transformation)
-    @transformations[precedence] << proc { |next_method| proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
+    @transformations[precedence] << proc { |next_method|
+              proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
+  end
+
+  def transformations
+    @transformations.compact.flatten
   end
 
   def inject(hash)
