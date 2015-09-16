@@ -1,19 +1,28 @@
 require_relative 'object_extension.rb'
 
+class MultiLevelQueue < Array
+  def [](n)
+    super(n) || self[n]=[]
+  end
+  def to_list
+    compact.flatten
+  end
+end
+
+
 class Transformer
   attr_accessor :origin, :original_method, :transformations
 
   def initialize(origin, method_to_transform)
     @origin = origin
     @original_method = origin.instance_method(method_to_transform)
-    @transformations = []
-    @transformations.define_singleton_method(:[]){|n| super(n) || self[n]=[]}
+    @transformations = MultiLevelQueue.new
   end
 
   def transform_method(&transforms)
     instance_eval &transforms
 
-    transformations = self.transformations
+    transformations = self.transformations.to_list
     original_method = self.original_method
 
     @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
@@ -26,10 +35,6 @@ class Transformer
   def add_transformation(precedence, &transformation)
     @transformations[precedence] << proc { |next_method|
               proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
-  end
-
-  def transformations
-    @transformations.compact.flatten
   end
 
   def inject(hash)
