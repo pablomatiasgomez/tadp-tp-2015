@@ -37,7 +37,7 @@ class Transformer
               proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
   end
 
-  def inject(hash)
+  def inject(hash,precedence=2)
     method_parameter_names = @original_method.parameters.map { |_, n| n }
     method_name = @original_method.name
     hash.keys.each { |key|
@@ -45,7 +45,7 @@ class Transformer
         raise NoParameterException.new("Cant inject #{key}, the method doesn't have that parameter")
       end }
 
-    add_transformation(2) { |next_method, *args, &arg_block|
+    add_transformation(precedence) { |next_method, *args, &arg_block|
     method_parameter_names.each_with_index { |arg_name, index|
       if hash.key?(arg_name)
         args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
@@ -54,26 +54,26 @@ class Transformer
     instance_exec_b(arg_block, *args, &next_method) }
   end
 
-  def before(&logic)
-    add_transformation(1) {|next_method, *args, &arg_block|
+  def before(precedence=1,&logic)
+    add_transformation(precedence) {|next_method, *args, &arg_block|
       cont = proc { |_, _, *new_parameters, &arg_block| instance_exec_b(arg_block, *new_parameters, &next_method) }
       instance_exec_b(arg_block, self, cont, *args, &logic) }
   end
 
 
-  def after(&logic)
-    add_transformation(1) { |next_method, *args, &arg_block|
+  def after(precedence=1,&logic)
+    add_transformation(precedence) { |next_method, *args, &arg_block|
       instance_exec_b(arg_block, *args, &next_method)
       instance_exec_b(arg_block, self, *args, &logic) }
   end
 
-  def instead_of(&logic)
-    add_transformation(0) { |_, *args, &arg_block| instance_exec_b(arg_block, self, *args, &logic) }
+  def instead_of(precedence=0,&logic)
+    add_transformation(precedence) { |_, *args, &arg_block| instance_exec_b(arg_block, self, *args, &logic) }
   end
 
-  def redirect_to(target)
+  def redirect_to(target,precedence=0)
     method_name = @original_method.name
-    add_transformation(0) { |_, *args, &arg_block|target.send(method_name, *args, &arg_block) }
+    add_transformation(precedence) { |_, *args, &arg_block|target.send(method_name, *args, &arg_block) }
   end
 
 end
