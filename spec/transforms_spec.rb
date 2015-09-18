@@ -31,11 +31,13 @@ describe 'Origin Transforms' do
     end
 
     it 'should BOOM raising NoParameterException' do
-      expect {Aspects.on MyClass do
-                transform( where has_parameters(1, /p2/)) do
-                  inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
-                end
-              end }.to raise_exception(NoParameterException)
+      expect {
+        Aspects.on MyClass do
+          transform( where has_parameters(1, /p2/)) do
+            inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
+          end
+        end 
+      }.to raise_exception(NoParameterException)
     end
 
     it 'should print foo-bar and the proc (selector->old_parameter)' do
@@ -53,13 +55,13 @@ describe 'Origin Transforms' do
   context 'Redirect Transform' do
 
     it 'should redirect Hi World to Bye Bye World' do
-    Aspects.on A do
-      transform( where name(/say_hi/)) do
-        redirect_to(B.new)
+      Aspects.on A do
+        transform( where name(/say_hi/)) do
+          redirect_to(B.new)
+        end
       end
-    end
 
-    expect(A.new.say_hi("World")).to eq("Bye Bye, World")
+      expect(A.new.say_hi("World")).to eq("Bye Bye, World")
     end
 
   end
@@ -123,8 +125,8 @@ describe 'Origin Transforms' do
         transform(where name(/say_hi/)) do
           inject(x: "Tarola")
           instead_of do |instance, *args|
-          args[0]+="!"
-          "Bye Bye, #{args[0]}"
+            args[0]+="!"
+            "Bye Bye, #{args[0]}"
           end
         end
       end
@@ -133,7 +135,7 @@ describe 'Origin Transforms' do
     end
 
     it 'asdasd' do
-       Aspects.on B2 do
+      Aspects.on B2 do
         transform(where has_parameters(1, /p2/)) do
           inject(p2: '!')
           redirect_to(A2.new)
@@ -148,13 +150,37 @@ describe 'Origin Transforms' do
   context 'Methods with blocks Transforms' do
 
     it 'should redirect not just the arguments but the block' do
-       Aspects.on A3 do
+      Aspects.on A3 do
         transform(where name(/hacer_algo/)) do
           redirect_to(B3.new)
         end
       end
 
       expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
+    end
+
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B3 do
+        transform(where has_parameters(1, /block/)) do
+          before do |instance, cont, *args|
+            "hello"
+          end
+        end
+      end
+
+      expect(B3.new.hacer_algo{ |text| text + "!" }).to eq("hello")
+    end
+
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B3 do
+        transform(where has_parameters(1, /block/)) do
+          after do |instance, *args|
+            "bye"
+          end
+        end
+      end
+
+      expect(B3.new.hacer_algo{ |text| text + "!" }).to eq("bye")
     end
 
   end

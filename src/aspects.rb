@@ -8,7 +8,8 @@ class Aspects
 
   def self.find_origins(*possible_origins)
     origins = possible_origins.flat_map { |possible_origin|
-        possible_origin.is_a?(Regexp) ? regex_to_origins(possible_origin) : [possible_origin] }
+      possible_origin.is_a?(Regexp) ? regex_to_origins(possible_origin) : [possible_origin]
+    }
 
     origins.empty? ? (raise EmptyOriginException.new("Can't call Aspects.on without origins to transform"))
     : origins.uniq

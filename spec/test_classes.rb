@@ -44,13 +44,13 @@ end
 #Redirect Transform
 class A
   def say_hi(x)
-    "Hi, "+x
+    "Hi, " + x
   end
 end
 
 class B
   def say_hi(x)
-    "Bye Bye, "+x
+    "Bye Bye, " + x
   end
 end
 
