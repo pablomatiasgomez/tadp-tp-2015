@@ -185,4 +185,30 @@ describe 'Origin Transforms' do
 
   end
 
+  context 'Aspects with regexes' do
+
+    it 'should apply the inject and the after for both saludar and despedir' do
+      Aspects.on A4, /.*4/ do
+        transform(where has_parameters(1, /p_saludar/)) do
+          inject(p_saludar: "Roberto")
+          after do |instance, *args|
+            "Dios dice: hola " + args[0] + "!"
+          end
+        end
+
+        transform(where has_parameters(1, /p_despedir/)) do
+          inject(p_despedir: "Roberto")
+          after do |instance, *args|
+            "Dios dice: chau " + args[0] + "!"
+          end
+        end
+      end
+
+      expect(A4.new.despedir "Jose").to eq("Dios dice: chau Roberto!")
+      expect(B4.new.saludar "Jose").to eq("Dios dice: hola Roberto!")
+    end
+
+  end
+
+
 end

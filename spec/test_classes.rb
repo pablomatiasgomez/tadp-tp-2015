@@ -91,3 +91,26 @@ class B3
     block.call("Estoy en B")
   end
 end
+
+
+
+#Aspects with regex
+class A4
+  def saludar(p_saludar)
+    'A dice: hola ' + p_saludar + '!'
+  end
+
+  def despedir(p_despedir)
+    'A dice: chau ' + p_despedir + "!"
+  end
+end
+
+class B4
+  def saludar(p_saludar)
+    'B dice: hola ' + p_saludar + '!'
+  end
+
+  def despedir(p_despedir)
+    'B dice: chau ' + p_despedir + "!"
+  end
+end
