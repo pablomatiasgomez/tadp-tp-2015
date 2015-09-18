@@ -108,7 +108,7 @@ describe 'Origins Conditions' do
       expect(one_parameter_with_param).to eq([:bar])
     end
 
-    it 'should get foo method (has 2 parameters with param in the name' do
+    it 'should get foo method (has 2 parameters with param in the name)' do
       two_parameter_with_param = (Aspects.on Marasa do
                                     where has_parameters(2, /param.*/)
                                   end)
@@ -116,12 +116,20 @@ describe 'Origins Conditions' do
       expect(two_parameter_with_param).to eq([:foo])
     end
 
-    it 'should get empty array (nobody has 3 parameters with param in the name' do
+    it 'should get empty array (nobody has 3 parameters with param in the name)' do
       three_parameter_with_param = (Aspects.on Marasa do
                                       where has_parameters(3, /param.*/)
                                     end)
 
       expect(three_parameter_with_param).to eq([])
+    end
+
+    it 'should get empty array (nobody has 2 parameters with param2.* in the name)' do
+      methods = (Aspects.on Marasa do
+        where has_parameters(2, /param2.*/)
+      end)
+
+      expect(methods).to eq([])
     end
 
   end

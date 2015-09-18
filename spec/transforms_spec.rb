@@ -36,7 +36,7 @@ describe 'Origin Transforms' do
           transform( where has_parameters(1, /p2/)) do
             inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
           end
-        end 
+        end
       }.to raise_exception(NoParameterException)
     end
 

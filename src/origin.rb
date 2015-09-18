@@ -11,7 +11,8 @@ class Origin
 
   def where(*conditions)
     origin_methods(target_origin).select { |origin_method|
-      conditions.all? {|condition| condition.call(target_origin,origin_method)} }
+      conditions.all? {|condition| condition.call(target_origin,origin_method)} 
+    }
   end
 
   def transform(origin_methods, &transforms)
