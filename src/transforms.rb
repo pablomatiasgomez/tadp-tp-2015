@@ -41,7 +41,7 @@ class Transformer
     injected_hash_param.each do |key, value|
       insert_index = @original_method.parameters.find_index { |_, p| p == key }
       insert_index ? @inject_hash.merge!(insert_index=> value)
-                   : (raise NoParameterException.new("Cant inject #{key}, #{@old_parameter} hasnt that parameter"))
+                   : (raise NoParameterException.new("Cant inject #{key}, #{@original_method.name} hasnt that parameter"))
     end
   end
 
