@@ -5,11 +5,14 @@ require_relative 'test_classes'
 
 describe 'Origin Transforms' do
 
+
   before(:each) do
-    load 'test_classes.rb'
+    $setup.call
   end
 
+
   context 'Inject Parameters Transform' do
+
 
     let(:mi_class_instance) { MyClass.new }
 

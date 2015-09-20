@@ -1,3 +1,4 @@
+$setup=proc do
 #Conditions
 class Sarasa
   def foo ( p1 , p2 , p3 , p4 = 'a' , p5 = 'b' , p6 = 'c' )
@@ -90,4 +91,5 @@ class B3
   def hacer_algo(&block)
     block.call("Estoy en B")
   end
+end
 end
