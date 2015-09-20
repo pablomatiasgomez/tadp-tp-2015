@@ -42,7 +42,7 @@ class Transformer
     method_name = @original_method.name
     hash.keys.each { |key|
       unless method_parameter_names.include?key
-        raise NoParameterException.new("Cant inject #{key}, the method doesn't have that parameter")
+        raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter")
       end }
 
     add_transformation(precedence) { |old_method, *args, &arg_block|
