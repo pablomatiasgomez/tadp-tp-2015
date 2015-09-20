@@ -5,11 +5,15 @@ require_relative 'test_classes'
 
 describe 'Origin Transforms' do
 
+  before(:each) do
+    load 'test_classes.rb'
+  end
+
   context 'Inject Parameters Transform' do
 
     let(:mi_class_instance) { MyClass.new }
 
-    let(:transform_methods) { Aspects.on mi_class_instance do
+    let(:transform_methods) { Aspects.on MyClass do
                                 transform(where has_parameters(1,/p2/)) do
                                   inject(p2: 'bar')
                                 end
@@ -52,6 +56,8 @@ describe 'Origin Transforms' do
 
   context 'Redirect Transform' do
 
+
+
     it 'should redirect Hi World to Bye Bye World' do
     Aspects.on A do
       transform( where name(/say_hi/)) do
@@ -65,6 +71,8 @@ describe 'Origin Transforms' do
   end
 
   context 'Inject Code Transform' do
+
+
 
     let(:sarlompa) {SarlompaClass.new}
 
@@ -118,6 +126,8 @@ describe 'Origin Transforms' do
 
   context 'Combined Transforms' do
 
+
+
     it 'should combine both transforms' do
       Aspects.on B do
         transform(where name(/say_hi/)) do
@@ -146,6 +156,8 @@ describe 'Origin Transforms' do
   end
 
   context 'Methods with blocks Transforms' do
+
+
 
     it 'should redirect not just the arguments but the block' do
        Aspects.on A3 do
