@@ -42,16 +42,22 @@ $setup=proc do
     end
   end
 
-  #Redirect Transform
+  #Redirect Transform, combined & block
   class A
-    def say_hi(x)
-      "Hi, "+x
+    def say_hi(p1)
+      "A says: Hi, " + p1
+    end
+     def do_something(&block)
+      block.call("I'm A")
     end
   end
 
   class B
-    def say_hi(x)
-      "Bye Bye, "+x
+    def say_hi(p1)
+      "B says: Hi, " + p1
+    end
+     def do_something(&block)
+      block.call("I'm B")
     end
   end
 
@@ -69,27 +75,4 @@ $setup=proc do
     end
   end
 
-  #Combined Transforms
-  class A2
-    def saludar(p1)
-      'hola'+p1
-    end
-  end
-  class B2
-    def saludar(p2)
-      'chau'+p2
-    end
-  end
-
-  #Transforms with blocks
-  class A3
-    def hacer_algo(&block)
-      block.call("Estoy en A")
-    end
-  end
-  class B3
-    def hacer_algo(&block)
-      block.call("Estoy en B")
-    end
-  end
 end

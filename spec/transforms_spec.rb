@@ -67,7 +67,7 @@ describe 'Origin Transforms' do
       end
     end
 
-    expect(A.new.say_hi("World")).to eq("Bye Bye, World")
+    expect(A.new.say_hi("World")).to eq("B says: Hi, World")
     end
 
   end
@@ -129,10 +129,10 @@ describe 'Origin Transforms' do
     it 'should combine both transforms' do
       Aspects.on B do
         transform(where name(/say_hi/)) do
-          inject(x: "Tarola")
+          inject(p1: "Tarola")
           instead_of do | *args|
-          args[0]+="!"
-          "Bye Bye, #{args[0]}"
+            args[0]+="!"
+            "Bye Bye, #{args[0]}"
           end
         end
       end
@@ -141,26 +141,26 @@ describe 'Origin Transforms' do
     end
 
     it 'should combine both transforms' do
-       Aspects.on B2 do
-        transform(where has_parameters(1, /p2/)) do
-          inject(p2: '!')
-          redirect_to(A2.new)
+       Aspects.on B do
+        transform(where has_parameters(1, /p1/)) do
+          inject(p1: 'robert!')
+          redirect_to(A.new)
         end
       end
-      expect(B2.new.saludar('pepe')).to eq('hola!')
+      expect(B.new.say_hi('pepe')).to eq('A says: Hi, robert!')
     end
   end
 
   context 'Methods with blocks Transforms' do
 
     it 'should redirect not just the arguments but the block' do
-       Aspects.on A3 do
-        transform(where name(/hacer_algo/)) do
-          redirect_to(B3.new)
+       Aspects.on A do
+        transform(where name(/do_something/)) do
+          redirect_to(B.new)
         end
       end
 
-      expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
+      expect(A.new.do_something{ |text| text + "!" }).to eq("I'm B!")
     end
   end
 end
