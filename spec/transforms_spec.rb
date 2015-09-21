@@ -160,6 +160,30 @@ describe 'Origin Transforms' do
 
       expect(A.new.do_something{ |text| text + "!" }).to eq("I'm B!")
     end
+
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B do
+        transform(where has_parameters(1, /block/)) do
+          before do |cont, *args|
+            "hello"
+          end
+        end
+      end
+
+      expect(B.new.do_something{ |text| text + "!" }).to eq("hello")
+    end
+
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B do
+        transform(where has_parameters(1, /block/)) do
+          after do |*args|
+            "bye"
+          end
+        end
+      end
+
+      expect(B.new.do_something{ |text| text + "!" }).to eq("bye")
+    end
   end
 
 

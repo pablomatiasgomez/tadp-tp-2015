@@ -10,8 +10,8 @@ class Aspects
     origins = possible_origins.flat_map { |possible_origin|
                                 possible_origin.is_a?(Regexp) ? regex_to_origins(possible_origin) : [possible_origin] }
 
-    origins.empty? ? (raise EmptyOriginException.new("Can't call Aspects.on without origins to transform"))
-                   : origins.uniq
+    raise EmptyOriginException.new("Can't call Aspects.on without origins to transform") if origins.empty?
+    origins.uniq
   end
 
   def self.on(*possible_origins, &block)
