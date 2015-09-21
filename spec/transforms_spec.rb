@@ -59,17 +59,15 @@ describe 'Origin Transforms' do
   end
 
   context 'Redirect Transform' do
-
     it 'should redirect Hi World to Bye Bye World' do
-    Aspects.on A do
-      transform( where name(/say_hi/)) do
-        redirect_to(B.new)
+      Aspects.on A do
+        transform( where name(/say_hi/)) do
+          redirect_to(B.new)
+        end
       end
-    end
 
-    expect(A.new.say_hi("World")).to eq("B says: Hi, World")
+      expect(A.new.say_hi("World")).to eq("B says: Hi, World")
     end
-
   end
 
   context 'Inject Code Transform' do
@@ -163,4 +161,22 @@ describe 'Origin Transforms' do
       expect(A.new.do_something{ |text| text + "!" }).to eq("I'm B!")
     end
   end
+
+
+  context 'Aspects with regexes' do
+    it 'should apply the inject and the after for both saludar and despedir' do
+      Aspects.on A, /[AB]/ do
+        transform(where name(/say_hi/)) do
+          inject(p1: "Roberto")
+          after do |*args|
+            "God says: Hi, " + args[0] + "!"
+          end
+        end
+      end
+
+      expect(A.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
+      expect(B.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
+    end
+  end
+
 end
