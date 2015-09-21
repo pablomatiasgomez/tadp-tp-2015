@@ -8,7 +8,6 @@ describe 'Origins Find' do
     $setup.call
   end
 
-  
   let(:sarasa) { Sarasa.new }
   let(:object_b) { TestClass.new }
 

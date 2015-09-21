@@ -5,22 +5,21 @@ require_relative 'test_classes'
 
 describe 'Origin Transforms' do
 
-
   before(:each) do
     $setup.call
   end
 
-
   context 'Inject Parameters Transform' do
-
 
     let(:mi_class_instance) { MyClass.new }
 
-    let(:transform_methods) { Aspects.on MyClass do
-                                transform(where has_parameters(1,/p2/)) do
-                                  inject(p2: 'bar')
-                                end
-                              end }
+    let(:transform_methods) { 
+      Aspects.on MyClass do
+        transform(where has_parameters(1,/p2/)) do
+          inject(p2: 'bar')
+        end
+      end
+    }
 
     it 'should print foo-bar (bar is already injected)' do
       transform_methods
@@ -38,11 +37,13 @@ describe 'Origin Transforms' do
     end
 
     it 'should BOOM raising NoParameterException' do
-      expect {Aspects.on MyClass do
-                transform( where has_parameters(1, /p2/)) do
-                  inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
-                end
-              end }.to raise_exception(NoParameterException)
+      expect {
+        Aspects.on MyClass do
+          transform( where has_parameters(1, /p2/)) do
+            inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
+          end
+        end 
+      }.to raise_exception(NoParameterException)
     end
 
     it 'should print foo-bar and the proc (selector->old_parameter)' do
@@ -59,8 +60,6 @@ describe 'Origin Transforms' do
 
   context 'Redirect Transform' do
 
-
-
     it 'should redirect Hi World to Bye Bye World' do
     Aspects.on A do
       transform( where name(/say_hi/)) do
@@ -74,8 +73,6 @@ describe 'Origin Transforms' do
   end
 
   context 'Inject Code Transform' do
-
-
 
     let(:sarlompa) {SarlompaClass.new}
 
@@ -129,8 +126,6 @@ describe 'Origin Transforms' do
 
   context 'Combined Transforms' do
 
-
-
     it 'should combine both transforms' do
       Aspects.on B do
         transform(where name(/say_hi/)) do
@@ -152,15 +147,11 @@ describe 'Origin Transforms' do
           redirect_to(A2.new)
         end
       end
-
-       expect(B2.new.saludar('pepe')).to eq('hola!')
+      expect(B2.new.saludar('pepe')).to eq('hola!')
     end
-
   end
 
   context 'Methods with blocks Transforms' do
-
-
 
     it 'should redirect not just the arguments but the block' do
        Aspects.on A3 do
@@ -171,7 +162,5 @@ describe 'Origin Transforms' do
 
       expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
     end
-
   end
-
 end
