@@ -41,15 +41,15 @@ class Transformer
     method_parameter_names = @original_method.parameters.map { |_, n| n }
     method_name = @original_method.name
     hash.keys.each { |key|
-      unless method_parameter_names.include?key
-        raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter")
-      end }
+      raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter") unless method_parameter_names.include?key
+    }
 
     add_transformation(precedence) { |old_method, *args, &arg_block|
     method_parameter_names.each_with_index { |arg_name, index|
       if hash.key?(arg_name)
         args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
-      end }
+      end
+    }
 
     instance_exec_b(arg_block, *args, &old_method) }
   end
