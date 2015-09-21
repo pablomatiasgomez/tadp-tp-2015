@@ -4,6 +4,10 @@ require_relative 'test_classes.rb'
 
 describe 'Origins Conditions' do
 
+  before(:each) do
+    $setup.call
+  end
+  
   let(:object_instance_methods) {Object.instance_methods+Object.private_instance_methods}
 
   it 'should get the instance methods of Object' do
