@@ -1,5 +1,4 @@
 require_relative 'object_extension.rb'
-require_relative 'transformation.rb'
 
 class MultiLevelQueue < Array
   def [](n)
@@ -13,8 +12,6 @@ end
 
 class Transformer
   attr_accessor :origin, :original_method, :transformations
-
-  known_transformations=[:instead_of,:before,:after,:redirect_to,:inject]
 
   def initialize(origin, method_to_transform)
     @origin = origin
@@ -30,15 +27,14 @@ class Transformer
 
     @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
       base_method = original_method.clone.bind(self)
-      transformed_method = transformations.reduce(base_method){ |method, transformation| transformation.transform(method) }
+      transformed_method = transformations.reduce(base_method){ |method, transformation| transformation.call(method) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
   end
 
   def add_transformation(precedence, &transformation)
-    transformation  = Transformation.new &transformation
-    @transformations[precedence] << transformation
-    transformation
+    @transformations[precedence] << proc { |next_method|
+              proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
   end
 
   def inject(hash,precedence=2)
@@ -78,16 +74,6 @@ class Transformer
     method_name = @original_method.name
     add_transformation(precedence) { |_, *args, &arg_block|target.send(method_name, *args, &arg_block) }
   end
-
-  known_transformations.each do |transformation_symbol|
-    define_method("consumible_#{transformation_symbol}") do |n,*args,&logic|
-    transformation = self.send(transformation_symbol,*args,&logic)
-    transformation.consumible(n)
-    end
-  end
-
-
-
 
 end
 
