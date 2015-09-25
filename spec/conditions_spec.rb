@@ -4,6 +4,10 @@ require_relative 'test_classes.rb'
 
 describe 'Origins Conditions' do
 
+  before(:each) do
+    $setup.call
+  end
+
   let(:object_instance_methods) {Object.instance_methods+Object.private_instance_methods}
 
   it 'should get the instance methods of Object' do
@@ -52,7 +56,7 @@ describe 'Origins Conditions' do
 
   context 'Visibility Condition' do
 
-    it 'should get bar method ( bar is private)' do
+    it 'should get bar method (bar is private)' do
       private_condition = (Aspects.on TestClass do
                             where name(/bar/), is_private
                           end)
@@ -124,6 +128,14 @@ describe 'Origins Conditions' do
       expect(three_parameter_with_param).to eq([])
     end
 
+     it 'should get empty array (nobody has 2 parameters with param2.* in the name)' do
+      methods = (Aspects.on Marasa do
+        where has_parameters(2, /param2.*/)
+      end)
+
+      expect(methods).to eq([])
+    end
+    
   end
 
  context 'Neg Condition' do

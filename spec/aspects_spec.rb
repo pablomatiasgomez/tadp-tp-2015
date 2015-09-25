@@ -4,6 +4,10 @@ require_relative 'test_classes.rb'
 
 describe 'Origins Find' do
 
+  before(:each) do
+    $setup.call
+  end
+
   let(:sarasa) { Sarasa.new }
   let(:object_b) { TestClass.new }
 

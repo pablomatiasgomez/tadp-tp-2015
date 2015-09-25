@@ -4,22 +4,21 @@ require_relative 'test_classes'
 
 describe 'Origin Transforms' do
 
-
   before(:each) do
     $setup.call
   end
 
-
   context 'Inject Parameters Transform' do
-
 
     let(:mi_class_instance) { MyClass.new }
 
-    let(:transform_methods) { Aspects.on MyClass do
-                                transform(where has_parameters(1,/p2/)) do
-                                  inject(p2: 'bar')
-                                end
-                              end }
+    let(:transform_methods) { 
+      Aspects.on MyClass do
+        transform(where has_parameters(1,/p2/)) do
+          inject(p2: 'bar')
+        end
+      end
+    }
 
     it 'should print foo-bar (bar is already injected)' do
       transform_methods
@@ -37,11 +36,13 @@ describe 'Origin Transforms' do
     end
 
     it 'should BOOM raising NoParameterException' do
-      expect {Aspects.on MyClass do
-                transform( where has_parameters(1, /p2/)) do
-                  inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
-                end
-              end }.to raise_exception(NoParameterException)
+      expect {
+        Aspects.on MyClass do
+          transform( where has_parameters(1, /p2/)) do
+            inject(asdasd: proc { |receptor, mensaje, arg_anterior| "bar(#{mensaje}->#{arg_anterior})" })
+          end
+        end 
+      }.to raise_exception(NoParameterException)
     end
 
     it 'should print foo-bar and the proc (selector->old_parameter)' do
@@ -57,24 +58,18 @@ describe 'Origin Transforms' do
   end
 
   context 'Redirect Transform' do
-
-
-
     it 'should redirect Hi World to Bye Bye World' do
-    Aspects.on A do
-      transform( where name(/say_hi/)) do
-        redirect_to(B.new)
+      Aspects.on A do
+        transform( where name(/say_hi/)) do
+          redirect_to(B.new)
+        end
       end
-    end
 
-    expect(A.new.say_hi("World")).to eq("Bye Bye, World")
+      expect(A.new.say_hi("World")).to eq("B says: Hi, World")
     end
-
   end
 
   context 'Inject Code Transform' do
-
-
 
     let(:sarlompa) {SarlompaClass.new}
 
@@ -128,15 +123,13 @@ describe 'Origin Transforms' do
 
   context 'Combined Transforms' do
 
-
-
     it 'should combine both transforms' do
       Aspects.on B do
         transform(where name(/say_hi/)) do
-          inject(x: "Tarola")
+          inject(p1: "Tarola")
           instead_of do | *args|
-          args[0]+="!"
-          "Bye Bye, #{args[0]}"
+            args[0]+="!"
+            "Bye Bye, #{args[0]}"
           end
         end
       end
@@ -145,32 +138,68 @@ describe 'Origin Transforms' do
     end
 
     it 'should combine both transforms' do
-       Aspects.on B2 do
-        transform(where has_parameters(1, /p2/)) do
-          inject(p2: '!')
-          redirect_to(A2.new)
+       Aspects.on B do
+        transform(where has_parameters(1, /p1/)) do
+          inject(p1: 'robert!')
+          redirect_to(A.new)
         end
       end
-
-       expect(B2.new.saludar('pepe')).to eq('hola!')
+      expect(B.new.say_hi('pepe')).to eq('A says: Hi, robert!')
     end
-
   end
 
   context 'Methods with blocks Transforms' do
 
-
-
     it 'should redirect not just the arguments but the block' do
-       Aspects.on A3 do
-        transform(where name(/hacer_algo/)) do
-          redirect_to(B3.new)
+       Aspects.on A do
+        transform(where name(/do_something/)) do
+          redirect_to(B.new)
         end
       end
 
-      expect(A3.new.hacer_algo{|text|text+"!"}).to eq("Estoy en B!")
+      expect(A.new.do_something{ |text| text + "!" }).to eq("I'm B!")
     end
 
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B do
+        transform(where has_parameters(1, /block/)) do
+          before do |cont, *args|
+            "hello"
+          end
+        end
+      end
+
+      expect(B.new.do_something{ |text| text + "!" }).to eq("hello")
+    end
+
+    it 'should apply the before and return without calling cont' do
+      Aspects.on B do
+        transform(where has_parameters(1, /block/)) do
+          after do |*args|
+            "bye"
+          end
+        end
+      end
+
+      expect(B.new.do_something{ |text| text + "!" }).to eq("bye")
+    end
+  end
+
+
+  context 'Aspects with regexes' do
+    it 'should apply the inject and the after for both saludar and despedir' do
+      Aspects.on A, /[AB]/ do
+        transform(where name(/say_hi/)) do
+          inject(p1: "Roberto")
+          after do |*args|
+            "God says: Hi, " + args[0] + "!"
+          end
+        end
+      end
+
+      expect(A.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
+      expect(B.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
+    end
   end
 
 end
