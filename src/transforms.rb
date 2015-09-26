@@ -45,6 +45,7 @@ class Transformer
       transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method,self) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
+
   end
 
   def add_transformation(precedence, &transformation_block)

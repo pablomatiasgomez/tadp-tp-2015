@@ -315,7 +315,7 @@ describe 'Origin Transforms' do
     let(:a1) {A.new}
     let(:a2) {A.new}
 
-    it 'should apply transformation correctly on objects' do
+    it 'should apply instead_of transformation correctly on objects' do
       Aspects.on a1,a2 do
         transform(where name(/do_something/)) do
           instead_of do self end
@@ -326,6 +326,24 @@ describe 'Origin Transforms' do
       expect(a2.do_something).to eq(a2)
       expect(a1.do_something).to_not eq(a2.do_something)
     end
+
+
+  it 'should transform all methods just in the given object' do
+
+    toad=A.new
+    Aspects.on toad do
+      transform(where name(/say/)) do
+        instead_of do |someone=''| "Thank you #{someone}! But our method is in another object!" end
+        end
+    end
+    expect(toad.say_hi("mario")).to eq("Thank you mario! But our method is in another object!")
+    expect(toad.say_bye).to eq("Thank you ! But our method is in another object!")
+    expect(A.new.say_hi("mario")).to eq("A says: Hi, mario")
+    expect(A.new.say_bye).to eq("A says: Goodbye!")
+    end
   end
+
+
+
 
 end
