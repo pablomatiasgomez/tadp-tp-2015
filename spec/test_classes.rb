@@ -40,7 +40,10 @@ $setup=proc do
     def say_hi(p1)
       "A says: Hi, " + p1
     end
-     def do_something(&block)
+    def say_bye
+      "A says: Goodbye!"
+    end
+    def do_something(&block)
       block.call("I'm A")
     end
   end
@@ -68,6 +71,12 @@ $setup=proc do
     end
     def m4(x)
       @x += x
+    end
+  end
+
+  module AImpostor
+    private
+    def say_bye
     end
   end
 

@@ -198,7 +198,9 @@ describe 'Origin Transforms' do
     end
 
     it 'should win the last transform in same precedence' do
-      Aspects.on A do
+      a = A.new
+
+      Aspects.on a do
         transform( where name(/say_hi/)) do
           redirect_to(B.new)
           instead_of do |*args|
@@ -207,10 +209,50 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(A.new.say_hi("World")).to eq('Ahora que es la ultima, cabe')
+      expect(A.new.say_hi("World")).to eq('A says: Hi, World')
+      expect(a.say_hi("World")).to eq('Ahora que es la ultima, cabe')
     end
 
-    
+    it 'should do two diferents transforms' do
+      a = A.new
+      b = Object.new
+      b.singleton_class.include(AImpostor)
+
+      Aspects.on A, b do
+        transform(where name(/say_bye/), is_private) do
+          redirect_to(a)
+          end
+        transform(where name(/say_hi/)) do
+          inject(p1: 'Im a')
+        end
+
+      end
+
+      expect(a.say_hi).to eq('A says: Hi, Im a')
+      expect(b.say_bye).to eq('A says: Goodbye!')
+    end
+
+    it 'should redirect before and after with diferentes @x' do
+      s1 = SarlompaClass.new
+      s2 = SarlompaClass.new
+
+      Aspects.on s1 do
+        transform(where name(/m2/)) do
+          after do |*args|
+            @x+100
+          end
+          before do |cont, *args|
+            @x = args[0]
+            cont.call(*args)
+          end
+          redirect_to(s2)
+        end
+      end
+
+      expect(s1.m2(10)).to eq(110)
+      expect(s1.x).to eq(10)
+      expect(s2.x).to eq(10)
+    end
 
   end
 
