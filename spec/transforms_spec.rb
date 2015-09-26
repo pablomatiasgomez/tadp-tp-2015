@@ -147,6 +147,42 @@ describe 'Origin Transforms' do
       end
       expect(B.new.say_hi('pepe')).to eq('A says: Hi, robert!')
     end
+
+    it 'should do after and before' do
+      Aspects.on SarlompaClass do
+        transform(where name(/m4/)) do
+          before do |cont, *args|
+            @x = 0
+            cont.call(*args)
+          end
+          after do |*args|
+            @x*2
+          end
+        end
+      end
+
+      expect(SarlompaClass.new.m4(2)).to eq(4)
+    end
+
+    it 'should do inject before instead of and after' do
+      Aspects.on SarlompaClass do
+        transform(where name(/m1/)) do
+          instead_of do |*args|
+            @x += args[0]
+          end
+          before do |cont, *args|
+            @x = 0
+            cont.call(nil, *args)
+          end
+          after do |*args|
+            @x*args[0]
+          end
+          inject({x: 2})
+        end
+      end
+
+      expect(SarlompaClass.new.m1(20000)).to eq(4)
+    end
   end
 
   context 'Methods with blocks Transforms' do
