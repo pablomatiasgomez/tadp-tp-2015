@@ -52,14 +52,15 @@ class Transformer
       raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter") unless method_parameter_names.include?key
     }
 
-    add_transformation(precedence) { |old_method, *args, &arg_block|
-    method_parameter_names.each_with_index { |arg_name, index|
+    before(precedence) do |old_method, *args, &arg_block|
+    method_parameter_names.each_with_index do |arg_name, index|
       if hash.key?(arg_name)
         args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
       end
-    }
+    end
 
-    instance_exec_b(arg_block, *args, &old_method) }
+    instance_exec_b(arg_block, *args, &old_method)
+    end
   end
 
   def before(precedence=1,&before_logic)
@@ -69,18 +70,19 @@ class Transformer
 
 
   def after(precedence=1,&after_logic)
-    add_transformation(precedence) { |old_method, *args, &arg_block|
+    before(precedence) do |old_method,*args,&arg_block|
       instance_exec_b(arg_block, *args, &old_method)
-      instance_exec_b(arg_block, *args, &after_logic) }
+      instance_exec_b(arg_block, *args, &after_logic)
+    end
   end
 
   def instead_of(precedence=0,&instead_of_logic)
-    add_transformation(precedence) { |_, *args, &arg_block| instance_exec_b(arg_block, *args, &instead_of_logic) }
+    before(precedence) do |_,*args,&arg_block| instance_exec_b(arg_block,*args,&instead_of_logic) end
   end
 
   def redirect_to(target,precedence=0)
     method_name = @original_method.name
-    add_transformation(precedence) { |_, *args, &arg_block|target.send(method_name, *args, &arg_block) }
+    before(precedence) do |_,*args,&arg_block| target.send(method_name,*args,&arg_block) end
   end
 
 end
