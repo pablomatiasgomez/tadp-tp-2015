@@ -26,8 +26,7 @@ class Transformer
     original_method = self.original_method
 
     @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
-      base_method = original_method.clone.bind(self)
-      transformed_method = transformations.reduce(base_method){ |method, transformation| transformation.call(method) }
+      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.call(method) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
   end
