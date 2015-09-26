@@ -18,9 +18,10 @@ class Transformation
     @transformation = transformation
   end
 
-  def transform(method)
+  def transform(method,target)
     transformation=@transformation
-    proc { |*args, &arg_block| instance_exec_b(arg_block, method, *args, &transformation) }
+    target.send(:define_singleton_method,:sarlompa_al_cuadrado) { |*args, &arg_block| instance_exec_b(arg_block, method, *args, &transformation) }
+    target.method(:sarlompa_al_cuadrado)
   end
 
 end
@@ -42,7 +43,7 @@ class Transformer
     original_method = @original_method
 
     @origin.send(:define_method, original_method.name) do  |*args, &arg_block|
-      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method) }
+      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method,self) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
   end
@@ -66,7 +67,7 @@ class Transformer
         end
       end
 
-      instance_exec_b(arg_block, *args, &original_method)
+      original_method.call(*args,&arg_block)
     end
   end
 
@@ -78,7 +79,7 @@ class Transformer
 
   def after(precedence = 1, &after_logic)
     before(precedence) do |original_method, *args, &arg_block|
-      instance_exec_b(arg_block, *args, &original_method)
+      original_method.call(*args,&arg_block)
       instance_exec_b(arg_block, *args,&after_logic)
     end
   end
