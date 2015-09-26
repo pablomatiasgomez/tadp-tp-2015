@@ -10,11 +10,18 @@ class Origin
   end
 
   def where(*conditions)
-    origin_methods(target_origin).select { |origin_method| conditions.all? { |condition| condition.call(target_origin,origin_method)} }
+    origin_methods(target_origin).select { |origin_method| conditions.all? { |condition| condition.call(origin_method)} }
   end
 
   def transform(origin_methods, &transforms)
-    origin_methods.each { |method| Transformer.new(@target_origin, method).transform_method &transforms }
+    origin_methods.each { |method| Transformer.new(@target_origin, method, visibility_of(method)).transform_method &transforms }
+  end
+
+  def visibility_of(method)
+    [:public,:private,:protected].each do |visibility|
+      (return visibility) if (target_origin.send("#{visibility.to_s}_instance_methods").include? method)
+    end
+    raise NoMethodError
   end
 
   def aspects_target(origin)

@@ -225,11 +225,11 @@ describe 'Origin Transforms' do
         transform(where name(/say_hi/)) do
           inject(p1: 'Im a')
         end
-
       end
 
       expect(a.say_hi).to eq('A says: Hi, Im a')
-      expect(b.say_bye).to eq('A says: Goodbye!')
+      expect(b.send(:say_bye)).to eq('A says: Goodbye!')
+
     end
 
     it 'should redirect before and after with diferentes @x' do
@@ -253,8 +253,8 @@ describe 'Origin Transforms' do
       expect(s1.x).to eq(10)
       expect(s2.x).to eq(10)
     end
+end
 
-  end
 
   context 'Methods with blocks Transforms' do
 
@@ -341,9 +341,47 @@ describe 'Origin Transforms' do
     expect(A.new.say_hi("mario")).to eq("A says: Hi, mario")
     expect(A.new.say_bye).to eq("A says: Goodbye!")
     end
+
+
+end
+
+  context 'Aspects should not modify visibility of a method' do
+
+      let(:pepita) {TestClass.new}
+
+      before(:each) do
+          Aspects.on TestClass do
+        transform(where name(/foo|bar/)) do
+          before do |method|
+            (return "You shouldn't be here") if self.private_methods.include?(method.name)
+            (return "This is an inoffensive public method") if self.public_methods.include?(method.name)
+            "How did you get here?"
+            end
+          end
+        end
+      end
+
+      context 'should keep the private method as private' do
+        it 'should raise exception when is directly called' do
+          expect{pepita.bar}.to raise_error(NoMethodError,/private method/)
+        end
+        it 'should work if called with send' do
+          expect(pepita.send(:bar)).to eq "You shouldn't be here"
+        end
+        it 'should be in the list of private methods' do
+          expect(pepita.private_methods.include? :bar).to be true
+        end
+      end
+
+      context 'should keep the public method as public' do
+        it 'should be in the list of public methods' do
+          expect(pepita.public_methods.include? :foo).to be true
+        end
+        it 'should work when called' do
+          expect(pepita.foo).to eq "This is an inoffensive public method"
+        end
+      end
+    
   end
-
-
-
 
 end

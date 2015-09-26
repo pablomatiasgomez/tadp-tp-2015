@@ -29,10 +29,11 @@ end
 class Transformer
   attr_accessor :origin, :original_method, :transformations
 
-  def initialize(origin, original_method)
+  def initialize(origin, original_method, visibility)
     @origin = origin
     @original_method = origin.instance_method(original_method)
     @transformations = MultiLevelQueue.new
+    @visibility = visibility
   end
 
   def transform_method(&transforms)
@@ -45,6 +46,8 @@ class Transformer
       transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method,self) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
+
+    @origin.send(@visibility,original_method.name)
 
   end
 
