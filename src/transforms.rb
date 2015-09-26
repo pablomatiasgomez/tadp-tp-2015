@@ -20,8 +20,7 @@ class Transformation
 
   def transform(method,target)
     transformation=@transformation
-    target.send(:define_singleton_method,:sarlompa_al_cuadrado) { |*args, &arg_block| instance_exec_b(arg_block, method, *args, &transformation) }
-    target.method(:sarlompa_al_cuadrado)
+    proc  { |*args, &arg_block| target.instance_exec_b(arg_block, method, *args, &transformation) }
   end
 
 end
