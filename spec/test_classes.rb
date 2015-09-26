@@ -8,6 +8,15 @@ $setup=proc do
     end
   end
 
+  class TestClass
+    def foo
+    end
+    private
+    def bar
+    end
+  end
+
+
   module Marasa
     def foo ( param1 , param2 )
     end
@@ -58,18 +67,15 @@ $setup=proc do
   end
 
   #Inject Transform
-  class SarlompaClass
+  class ClassWithAttrX
     attr_accessor :x
-    def m1(x, y)
+    def x_plus_y(x, y)
       x+y
     end
-    def m2(x)
+    def set_x_1(x)
       @x = x
     end
-    def m3(x)
-      @x = x
-    end
-    def m4(x)
+    def x_plus_param(x)
       @x += x
     end
   end

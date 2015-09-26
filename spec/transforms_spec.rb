@@ -72,11 +72,11 @@ describe 'Origin Transforms' do
 
   context 'Inject Code Transform' do
 
-    let(:sarlompa) {SarlompaClass.new}
+    let(:sarlompa) {ClassWithAttrX.new}
 
     it 'should do the before block before the method' do
-      Aspects.on SarlompaClass do
-        transform(where name(/m1/)) do
+      Aspects.on ClassWithAttrX do
+        transform(where name(/x_plus_y/)) do
           before do |cont, *args|
             @x = 10
             new_args = args.map { |arg| arg*10 }
@@ -85,13 +85,13 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(sarlompa.m1(1, 2)).to be(30)
+      expect(sarlompa.x_plus_y(1, 2)).to be(30)
       expect(sarlompa.x).to be(10)
     end
 
     it 'should do the after block after the method' do
-      Aspects.on SarlompaClass do
-        transform(where name(/m2/)) do
+      Aspects.on ClassWithAttrX do
+        transform(where name(/set_x_1/)) do
           after do |*args|
             if @x > 100
               2*@x
@@ -102,13 +102,13 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(sarlompa.m2(10)).to be(10)
-      expect(sarlompa.m2(200)).to be(400)
+      expect(sarlompa.set_x_1(10)).to be(10)
+      expect(sarlompa.set_x_1(200)).to be(400)
     end
 
     it 'should get 133 instead of the result of m3' do
-      Aspects.on SarlompaClass do
-        transform(where name ( /m3/ )) do
+      Aspects.on ClassWithAttrX do
+        transform(where name ( /set_x_1/ )) do
           instead_of do | *args|
             @x=123 + args.at(0)
             self.x
@@ -116,7 +116,7 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(sarlompa.m3(10)).to be(133)
+      expect(sarlompa.set_x_1(10)).to be(133)
       expect(sarlompa.x).to be(133)
     end
 
@@ -149,8 +149,8 @@ describe 'Origin Transforms' do
     end
 
     it 'should do after and before' do
-      Aspects.on SarlompaClass do
-        transform(where name(/m4/)) do
+      Aspects.on ClassWithAttrX do
+        transform(where name(/x_plus_param/)) do
           before do |cont, *args|
             @x = 0
             cont.call(*args)
@@ -161,12 +161,12 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(SarlompaClass.new.m4(2)).to eq(4)
+      expect(ClassWithAttrX.new.x_plus_param(2)).to eq(4)
     end
 
     it 'should do inject before instead of and after' do
-      Aspects.on SarlompaClass do
-        transform(where name(/m1/)) do
+      Aspects.on ClassWithAttrX do
+        transform(where name(/x_plus_y/)) do
           instead_of do |*args|
             @x += args[0]
           end
@@ -181,7 +181,7 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(SarlompaClass.new.m1(20000)).to eq(4)
+      expect(ClassWithAttrX.new.x_plus_y(20000)).to eq(4)
     end
 
     it 'should win the last transform in same precedence' do
@@ -233,11 +233,11 @@ describe 'Origin Transforms' do
     end
 
     it 'should redirect before and after with diferentes @x' do
-      s1 = SarlompaClass.new
-      s2 = SarlompaClass.new
+      s1 = ClassWithAttrX.new
+      s2 = ClassWithAttrX.new
 
       Aspects.on s1 do
-        transform(where name(/m2/)) do
+        transform(where name(/set_x_1/)) do
           after do |*args|
             @x+100
           end
@@ -249,7 +249,7 @@ describe 'Origin Transforms' do
         end
       end
 
-      expect(s1.m2(10)).to eq(110)
+      expect(s1.set_x_1(10)).to eq(110)
       expect(s1.x).to eq(10)
       expect(s2.x).to eq(10)
     end
