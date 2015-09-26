@@ -1,31 +1,31 @@
 module Conditions
 
   def name(regex)
-    proc { |method| method.match(regex) }
+    proc { |method| method.match regex }
   end
 
-  def is_visibility(visibility)
-    proc { |method| visibility_of(method)==visibility}
+  def visibility(visibility)
+    proc { |method| visibility_of(method) == visibility}
   end
 
   def is_public
-    is_visibility :public
+    visibility :public
   end
 
   def is_private
-    is_visibility :private
+    visibility :private
   end
 
-  def is_mode(sym)
+  def mode(sym)
     proc { |mode, _| mode == sym }
   end
 
   def mandatory
-    is_mode :req
+    mode :req
   end
 
   def optional
-    is_mode :opt
+    mode :opt
   end
 
   def has_parameters(count, mode = proc {|p| p})
@@ -34,7 +34,7 @@ module Conditions
   end
 
   def neg(*conditions)
-    proc { |method| conditions.none? { |condition| condition.call(origin, method) } }
+    proc { |method| conditions.none? { |condition| condition.call method } }
   end
 
 end

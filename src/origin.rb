@@ -18,10 +18,9 @@ class Origin
   end
 
   def visibility_of(method)
-    [:public,:private,:protected].each do |visibility|
-      (return visibility) if (target_origin.send("#{visibility.to_s}_instance_methods").include? method)
-    end
-    raise NoMethodError
+    [:public, :private, :protected].detect do |visibility|
+      target_origin.send("#{visibility.to_s}_instance_methods").include? method
+    end || (raise NoMethodError)
   end
 
   def aspects_target(origin)

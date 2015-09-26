@@ -291,10 +291,12 @@ end
 
       expect(B.new.do_something{ |text| text + "!" }).to eq("bye")
     end
+
   end
 
 
   context 'Aspects with regexes' do
+
     it 'should apply the inject and the after for both saludar and despedir' do
       Aspects.on A, /[AB]/ do
         transform(where name(/say_hi/)) do
@@ -308,11 +310,10 @@ end
       expect(A.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
       expect(B.new.say_hi "Jose").to eq("God says: Hi, Roberto!")
     end
+
   end
 
   context 'Aspects with objects' do
-
-
 
     context 'Identity of each object' do
 
@@ -363,7 +364,6 @@ end
         expect(A.new.say_bye).to eq("A says: Goodbye!")
       end
 
-
     end
 
     context 'Singleton class' do
@@ -377,24 +377,26 @@ end
               block.call("I'm A")
             end
           end
+
           Aspects.on aspectable do
               transform(where name(/do_something/)) do
                 instead_of do self end
               end
           end
+
           a.do_something(&:itself)
         end
       end
 
-
       it 'should be the same to modify an object or its singleton_class' do
-        expect(transform_aspectable.call(a) == transform_aspectable.call(a.singleton_class)).to be true
-      end
-      it 'should not have effect on an instance to modify its class singleton_class' do
-        expect(transform_aspectable.call(A.singleton_class) == "I'm A").to be true
+        expect(transform_aspectable.call(a)).to eq(transform_aspectable.call(a.singleton_class))
       end
 
+      it 'should not have effect on an instance to modify its class singleton_class' do
+        expect(transform_aspectable.call(A.singleton_class)).to eq("I'm A")
       end
+
+    end
 
   end
 
@@ -403,7 +405,7 @@ end
       let(:pepita) {TestClass.new}
 
       before(:each) do
-          Aspects.on TestClass do
+        Aspects.on TestClass do
         transform(where name(/foo|bar/)) do
           before do |method|
             (return "You shouldn't be here") if self.private_methods.include?(method.name)
@@ -415,24 +417,31 @@ end
       end
 
       context 'should keep the private method as private' do
+
         it 'should raise exception when is directly called' do
           expect{pepita.bar}.to raise_error(NoMethodError,/private method/)
         end
+
         it 'should work if called with send' do
           expect(pepita.send(:bar)).to eq "You shouldn't be here"
         end
+
         it 'should be in the list of private methods' do
-          expect(pepita.private_methods.include? :bar).to be true
+          expect(pepita.private_methods).to include :bar
         end
+
       end
 
       context 'should keep the public method as public' do
+
         it 'should be in the list of public methods' do
-          expect(pepita.public_methods.include? :foo).to be true
+          expect(pepita.public_methods).to include :foo
         end
+
         it 'should work when called' do
           expect(pepita.foo).to eq "This is an inoffensive public method"
         end
+
       end
 
   end

@@ -47,7 +47,7 @@ class Transformer
       instance_exec_b(arg_block, *args, &transformed_method)
     end
 
-    @origin.send(@visibility,original_method.name)
+    @origin.send(@visibility, original_method.name)
 
   end
 
