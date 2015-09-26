@@ -312,38 +312,91 @@ end
 
   context 'Aspects with objects' do
 
-    let(:a1) {A.new}
-    let(:a2) {A.new}
 
-    it 'should apply instead_of transformation correctly on objects' do
-      Aspects.on a1,a2 do
-        transform(where name(/do_something/)) do
-          instead_of do self end
+
+    context 'Identity of each object' do
+
+      let(:a1) {A.new}
+
+      let(:a2) {A.new}
+
+      before(:each) do
+          Aspects.on a1,a2 do
+          transform(where name(/do_something/)) do
+            instead_of do self end
+            end
+          end
+        end
+
+      it 'should return the same object that called the method' do
+          expect(a1.do_something).to eq(a1)
+          expect(a2.do_something).to eq(a2)
+      end
+
+      it 'both objects should not be the same' do
+          expect(a1.do_something).to_not eq(a2.do_something)
+      end
+
+    end
+
+    context 'Difference between specific object and instance of a class' do
+
+      let(:toad) {A.new}
+
+      before(:each) do
+
+        Aspects.on toad do
+          transform(where name(/say/)) do
+            instead_of do |someone=''| "Thank you #{someone}! But our method is in another object!" end
+          end
+        end
+
+      end
+
+      it 'should have its methods transformed' do
+        expect(toad.say_hi("mario")).to eq("Thank you mario! But our method is in another object!")
+        expect(toad.say_bye).to eq("Thank you ! But our method is in another object!")
+      end
+
+      it 'should not have its methods transformed because it is not the same object' do
+        expect(A.new.say_hi("mario")).to eq("A says: Hi, mario")
+        expect(A.new.say_bye).to eq("A says: Goodbye!")
+      end
+
+
+    end
+
+    context 'Singleton class' do
+
+      let(:a) {A.new}
+
+      let(:transform_aspectable) do
+        proc do |aspectable|
+          A.class_eval do
+            def do_something(&block)
+              block.call("I'm A")
+            end
+          end
+          Aspects.on aspectable do
+              transform(where name(/do_something/)) do
+                instead_of do self end
+              end
+          end
+          a.do_something(&:itself)
         end
       end
 
-      expect(a1.do_something).to eq(a1)
-      expect(a2.do_something).to eq(a2)
-      expect(a1.do_something).to_not eq(a2.do_something)
-    end
 
+      it 'should be the same to modify an object or its singleton_class' do
+        expect(transform_aspectable.call(a) == transform_aspectable.call(a.singleton_class)).to be true
+      end
+      it 'should not have effect on an instance to modify its class singleton_class' do
+        expect(transform_aspectable.call(A.singleton_class) == "I'm A").to be true
+      end
 
-  it 'should transform all methods just in the given object' do
+      end
 
-    toad=A.new
-    Aspects.on toad do
-      transform(where name(/say/)) do
-        instead_of do |someone=''| "Thank you #{someone}! But our method is in another object!" end
-        end
-    end
-    expect(toad.say_hi("mario")).to eq("Thank you mario! But our method is in another object!")
-    expect(toad.say_bye).to eq("Thank you ! But our method is in another object!")
-    expect(A.new.say_hi("mario")).to eq("A says: Hi, mario")
-    expect(A.new.say_bye).to eq("A says: Goodbye!")
-    end
-
-
-end
+  end
 
   context 'Aspects should not modify visibility of a method' do
 
@@ -381,7 +434,7 @@ end
           expect(pepita.foo).to eq "This is an inoffensive public method"
         end
       end
-    
+
   end
 
 end
