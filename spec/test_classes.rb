@@ -66,6 +66,9 @@ $setup=proc do
     def m3(x)
       @x = x
     end
+    def m4(x)
+      @x += x
+    end
   end
 
 end
