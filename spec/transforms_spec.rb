@@ -172,7 +172,7 @@ describe 'Origin Transforms' do
           end
           before do |cont, *args|
             @x = 0
-            cont.call(nil, *args)
+            cont.call(*args)
           end
           after do |*args|
             @x*args[0]
