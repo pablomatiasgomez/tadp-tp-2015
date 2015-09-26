@@ -9,6 +9,16 @@ class MultiLevelQueue < Array
   end
 end
 
+class Transformation
+  def initialize(&block)
+    @transformation_block=block
+  end
+  def transform(method)
+    transformation=@transformation_block
+    proc { |*args, &arg_block| instance_exec_b(arg_block, method, *args, &transformation) }
+  end
+end
+
 
 class Transformer
   attr_accessor :origin, :original_method, :transformations
@@ -26,14 +36,13 @@ class Transformer
     original_method = self.original_method
 
     @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
-      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.call(method) }
+      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
   end
 
-  def add_transformation(precedence, &transformation)
-    @transformations[precedence] << proc { |next_method|
-              proc{ |*args, &arg_block| instance_exec_b(arg_block, next_method, *args, &transformation) } }
+  def add_transformation(precedence, &transformation_block)
+    @transformations[precedence] << Transformation.new(&transformation_block)
   end
 
   def inject(hash,precedence=2)
