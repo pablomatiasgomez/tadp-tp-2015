@@ -183,6 +183,35 @@ describe 'Origin Transforms' do
 
       expect(SarlompaClass.new.m1(20000)).to eq(4)
     end
+
+    it 'should win the last transform in same precedence' do
+      Aspects.on A do
+        transform( where name(/say_hi/)) do
+          instead_of do |*args|
+            'si fuera la ultima apareceria esto pero no'
+          end
+          redirect_to(B.new)
+        end
+      end
+
+      expect(A.new.say_hi("World")).to eq("B says: Hi, World")
+    end
+
+    it 'should win the last transform in same precedence' do
+      Aspects.on A do
+        transform( where name(/say_hi/)) do
+          redirect_to(B.new)
+          instead_of do |*args|
+            'Ahora que es la ultima, cabe'
+          end
+        end
+      end
+
+      expect(A.new.say_hi("World")).to eq('Ahora que es la ultima, cabe')
+    end
+
+    
+
   end
 
   context 'Methods with blocks Transforms' do
