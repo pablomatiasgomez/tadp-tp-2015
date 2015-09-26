@@ -3,15 +3,8 @@ $setup=proc do
   class Sarasa
     def foo ( p1 , p2 , p3 , p4 = 'a' , p5 = 'b' , p6 = 'c' )
     end
-    def bar ( p1 , p2 = 'a' , p3 = 'b' , p4 = 'c' )
-    end
-  end
-
-  class TestClass
-    def foo
-    end
     private
-    def bar
+    def bar ( p1 , p2 = 'a' , p3 = 'b' , p4 = 'c' )
     end
   end
 
@@ -65,7 +58,7 @@ $setup=proc do
   class SarlompaClass
     attr_accessor :x
     def m1(x, y)
-      @x+y
+      x+y
     end
     def m2(x)
       @x = x

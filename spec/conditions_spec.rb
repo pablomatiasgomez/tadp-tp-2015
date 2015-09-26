@@ -57,7 +57,7 @@ describe 'Origins Conditions' do
   context 'Visibility Condition' do
 
     it 'should get bar method (bar is private)' do
-      private_condition = (Aspects.on TestClass do
+      private_condition = (Aspects.on Sarasa do
                             where name(/bar/), is_private
                           end)
 
@@ -65,11 +65,19 @@ describe 'Origins Conditions' do
     end
 
     it 'should get empty array (bar is not public)' do
-      public_condition = (Aspects.on TestClass do
-                            where name(/bar/), is_public
-                          end)
+      public_condition = (Aspects.on Sarasa do
+        where name(/bar/), is_public
+      end)
 
       expect(public_condition).to eq([])
+    end
+
+    it 'should get foo method (foo is public)' do
+      public_condition = (Aspects.on Sarasa do
+        where name(/foo/), is_public
+      end)
+
+      expect(public_condition).to eq([:foo])
     end
 
   end
@@ -126,14 +134,6 @@ describe 'Origins Conditions' do
                                     end)
 
       expect(three_parameter_with_param).to eq([])
-    end
-
-     it 'should get empty array (nobody has 2 parameters with param2.* in the name)' do
-      methods = (Aspects.on Marasa do
-        where has_parameters(2, /param2.*/)
-      end)
-
-      expect(methods).to eq([])
     end
     
   end

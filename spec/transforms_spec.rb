@@ -106,7 +106,7 @@ describe 'Origin Transforms' do
       expect(sarlompa.m2(200)).to be(400)
     end
 
-    it 'should get 123 instead of the result of m3' do
+    it 'should get 133 instead of the result of m3' do
       Aspects.on SarlompaClass do
         transform(where name ( /m3/ )) do
           instead_of do | *args|
@@ -140,7 +140,7 @@ describe 'Origin Transforms' do
 
     it 'should combine both transforms' do
        Aspects.on B do
-        transform(where has_parameters(1, /p1/)) do
+        transform(where name(/say_hi/)) do
           inject(p1: 'robert!')
           redirect_to(A.new)
         end
