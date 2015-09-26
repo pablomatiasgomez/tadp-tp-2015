@@ -203,4 +203,22 @@ describe 'Origin Transforms' do
     end
   end
 
+  context 'Aspects with objects' do
+
+    let(:a1) {A.new}
+    let(:a2) {A.new}
+
+    it 'should apply transformation correctly on objects' do
+      Aspects.on a1,a2 do
+        transform(where name(/do_something/)) do
+          instead_of do self end
+        end
+      end
+
+      expect(a1.do_something).to eq(a1)
+      expect(a2.do_something).to eq(a2)
+      expect(a1.do_something).to_not eq(a2.do_something)
+    end
+  end
+
 end
