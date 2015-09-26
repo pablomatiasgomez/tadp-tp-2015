@@ -12,14 +12,6 @@ module Conditions
     proc { |target_origin, method| target_origin.private_instance_methods.include?(method)}
   end
 
-  #Alternativa Aserrin Con Dulce de Leche v2.0
-  # ["public","private"].each do
-  # |visibility|
-  #   define_method("is_#{visibility}") do
-  #     proc{ |target_origin,method| target_origin.send("#{visibility}_instance_methods").include? method }
-  #   end
-  # end
-
   def is_mode(sym)
     proc { |mode, _| mode == sym }
   end
@@ -38,7 +30,7 @@ module Conditions
   end
 
   def neg(*conditions)
-    proc { |target_origin,method| conditions.none? { |condition| condition.call(target_origin,method) } }
+    proc { |target_origin, method| conditions.none? { |condition| condition.call(target_origin, method) } }
   end
 
 end

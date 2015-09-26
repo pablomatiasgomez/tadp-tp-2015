@@ -23,9 +23,9 @@ end
 class Transformer
   attr_accessor :origin, :original_method, :transformations
 
-  def initialize(origin, method_to_transform)
+  def initialize(origin, original_method)
     @origin = origin
-    @original_method = origin.instance_method(method_to_transform)
+    @original_method = origin.instance_method(original_method)
     @transformations = MultiLevelQueue.new
   end
 
@@ -52,27 +52,27 @@ class Transformer
       raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter") unless method_parameter_names.include?key
     }
 
-    before(precedence) do |old_method, *args, &arg_block|
+    before(precedence) do |original_method, *args, &arg_block|
     method_parameter_names.each_with_index do |arg_name, index|
       if hash.key?(arg_name)
         args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
       end
     end
 
-    instance_exec_b(arg_block, *args, &old_method)
+    instance_exec_b(arg_block, *args, &original_method)
     end
   end
 
   def before(precedence=1,&before_logic)
-    add_transformation(precedence) {|old_method, *args, &arg_block|
-      instance_exec_b(arg_block, old_method, *args, &before_logic) }
+    add_transformation(precedence) {|original_method, *args, &arg_block|
+      instance_exec_b(arg_block, original_method, *args, &before_logic) }
   end
 
 
   def after(precedence=1,&after_logic)
-    before(precedence) do |old_method,*args,&arg_block|
-      instance_exec_b(arg_block, *args, &old_method)
-      instance_exec_b(arg_block, *args, &after_logic)
+    before(precedence) do |original_method,*args,&arg_block|
+      instance_exec_b(arg_block, *args, &original_method)
+      instance_exec_b(arg_block, *args,&after_logic)
     end
   end
 
