@@ -23,11 +23,28 @@ class Transformation
     proc  { |*args, &arg_block| target.instance_exec_b(arg_block, method, *args, &transformation) }
   end
 
+  def consumible(n)
+    counter=0
+    regular_transformation=@transformation
+    times=n
+    @transformation=proc do
+      |next_method,*args,&arg_block|
+      if counter >= times
+        return instance_exec_b(arg_block,*args,&next_method)
+      else
+        counter+=1
+        return instance_exec_b(arg_block,next_method,*args,&regular_transformation)
+      end
+    end
+  end
+
 end
 
 
 class Transformer
   attr_accessor :origin, :original_method, :transformations
+
+  known_transformations=[:instead_of,:before,:after,:redirect_to,:inject]
 
   def initialize(origin, original_method, visibility)
     @origin = origin
@@ -52,7 +69,9 @@ class Transformer
   end
 
   def add_transformation(precedence, &transformation_block)
-    @transformations[precedence] << Transformation.new(&transformation_block)
+    transformation = Transformation.new(&transformation_block)
+    @transformations[precedence] << transformation
+    transformation
   end
 
   def inject(precedence = 2, hash)
@@ -96,6 +115,16 @@ class Transformer
     before(precedence) do |_,*args,&arg_block| target.send(method_name,*args,&arg_block) end
   end
 
+  def consumible(times_used,*transformations)
+    transformations.each {|transformation| transformation.consumible(times_used)}
+  end
+
+  known_transformations.each do |transformation_symbol|
+        define_method("consumible_#{transformation_symbol}") do |n,*args,&logic|
+        transformation = self.send(transformation_symbol,*args,&logic)
+        transformation.consumible(n)
+        end
+    end
 end
 
 class NoParameterException < Exception
