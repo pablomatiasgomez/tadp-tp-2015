@@ -55,16 +55,21 @@ class Transformer
 
   def transform_method &transforms
     instance_eval &transforms
-
+    visibility=@visibility
     transformations = self.transformations.to_list
     original_method = @original_method
+    redefine_method = proc do |transformed_method|
+      define_singleton_method(original_method.name, &transformed_method)
+      singleton_class.send(visibility,original_method.name)
+      end
 
     @origin.send(:define_method, original_method.name) do  |*args, &arg_block|
       transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method,self) }
-      instance_exec_b(arg_block, *args, &transformed_method)
+      instance_exec(transformed_method,&redefine_method)
+      send(original_method.name,*args,&arg_block)
     end
 
-    @origin.send(@visibility, original_method.name)
+    @origin.send(visibility,original_method.name)
 
   end
 
