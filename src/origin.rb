@@ -6,7 +6,7 @@ class Origin
   attr_accessor :target_origin
 
   def initialize(origin)
-    @target_origin = aspects_target(origin)
+    @target_origin = origin
   end
 
   def where(*conditions)
