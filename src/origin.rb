@@ -6,15 +6,21 @@ class Origin
   attr_accessor :target_origin
 
   def initialize(origin)
-    @target_origin=aspects_target(origin)
+    @target_origin = aspects_target(origin)
   end
 
   def where(*conditions)
-    origin_methods(target_origin).select { |origin_method| conditions.all? {|condition| condition.call(target_origin,origin_method)} }
+    origin_methods(target_origin).select { |origin_method| conditions.all? { |condition| condition.call(origin_method)} }
   end
 
   def transform(origin_methods, &transforms)
-    origin_methods.each { |method| Transformer.new(@target_origin, method).transform_method &transforms }
+    origin_methods.each { |method| Transformer.new(@target_origin, method, visibility_of(method)).transform_method &transforms }
+  end
+
+  def visibility_of(method)
+    [:public, :private, :protected].detect do |visibility|
+      target_origin.send("#{visibility.to_s}_instance_methods").include? method
+    end || (raise NoMethodError)
   end
 
   def aspects_target(origin)
@@ -24,15 +30,5 @@ class Origin
   def origin_methods(target_origin)
     (target_origin.instance_methods)+(target_origin.private_instance_methods)
   end
-
-  # Alternativa Aserrin con dulce de leche (Casi Superadora)
-  # { :origin_method => :instance_method,
-  #   :origin_public_methods => :public_instance_methods,
-  #   :origin_private_methods => :private_instance_methods,
-  #   :origin_define_method => :define_method}.each_pair do |my_method, original_method|
-  #   define_method(my_method) do |origin,*parameters,&block|
-  #     aspects_target(origin).send(original_method,*parameters,&block)
-  #   end
-  # end
 
 end

@@ -3,6 +3,7 @@ $setup=proc do
   class Sarasa
     def foo ( p1 , p2 , p3 , p4 = 'a' , p5 = 'b' , p6 = 'c' )
     end
+    private
     def bar ( p1 , p2 = 'a' , p3 = 'b' , p4 = 'c' )
     end
   end
@@ -14,6 +15,7 @@ $setup=proc do
     def bar
     end
   end
+
 
   module Marasa
     def foo ( param1 , param2 )
@@ -47,7 +49,10 @@ $setup=proc do
     def say_hi(p1)
       "A says: Hi, " + p1
     end
-     def do_something(&block)
+    def say_bye
+      "A says: Goodbye!"
+    end
+    def do_something(&block)
       block.call("I'm A")
     end
   end
@@ -62,16 +67,22 @@ $setup=proc do
   end
 
   #Inject Transform
-  class SarlompaClass
+  class ClassWithAttrX
     attr_accessor :x
-    def m1(x, y)
-      @x+y
+    def x_plus_y(x, y)
+      x+y
     end
-    def m2(x)
+    def set_x_1(x)
       @x = x
     end
-    def m3(x)
-      @x = x
+    def x_plus_param(x)
+      @x += x
+    end
+  end
+
+  module AImpostor
+    private
+    def say_bye
     end
   end
 

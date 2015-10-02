@@ -1,93 +1,100 @@
 require_relative 'object_extension.rb'
-require_relative 'transformation.rb'
 
 class MultiLevelQueue < Array
+
   def [](n)
-    super(n) || self[n]=[]
+    super(n) || self[n] = []
   end
+
   def to_list
     compact.flatten
   end
+
+end
+
+class Transformation
+
+  def initialize(&transformation)
+    @transformation = transformation
+  end
+
+  def transform(method,target)
+    transformation=@transformation
+    proc  { |*args, &arg_block| target.instance_exec_b(arg_block, method, *args, &transformation) }
+  end
+
 end
 
 
 class Transformer
   attr_accessor :origin, :original_method, :transformations
 
-  known_transformations=[:instead_of,:before,:after,:redirect_to,:inject]
-
-  def initialize(origin, method_to_transform)
+  def initialize(origin, original_method, visibility)
     @origin = origin
-    @original_method = origin.instance_method(method_to_transform)
+    @original_method = origin.instance_method(original_method)
     @transformations = MultiLevelQueue.new
+    @visibility = visibility
   end
 
   def transform_method(&transforms)
     instance_eval &transforms
 
     transformations = self.transformations.to_list
-    original_method = self.original_method
+    original_method = @original_method
 
-    @origin.send(:define_method, @original_method.name) do  |*args, &arg_block|
-      base_method = original_method.clone.bind(self)
-      transformed_method = transformations.reduce(base_method){ |method, transformation| transformation.transform(method) }
+    @origin.send(:define_method, original_method.name) do  |*args, &arg_block|
+      transformed_method = transformations.reduce(original_method.bind(self)){ |method, transformation| transformation.transform(method,self) }
       instance_exec_b(arg_block, *args, &transformed_method)
     end
+
+    @origin.send(@visibility, original_method.name)
+
   end
 
-  def add_transformation(precedence, &transformation)
-    transformation  = Transformation.new &transformation
-    @transformations[precedence] << transformation
-    transformation
+  def add_transformation(precedence, &transformation_block)
+    @transformations[precedence] << Transformation.new(&transformation_block)
   end
 
-  def inject(hash,precedence=2)
+  def inject(precedence = 2, hash)
     method_parameter_names = @original_method.parameters.map { |_, n| n }
     method_name = @original_method.name
+
     hash.keys.each { |key|
       raise NoParameterException.new("Cant inject #{key}, #{method_name} doesn't have that parameter") unless method_parameter_names.include?key
     }
 
-    add_transformation(precedence) { |old_method, *args, &arg_block|
-    method_parameter_names.each_with_index { |arg_name, index|
-      if hash.key?(arg_name)
-        args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
+    before(precedence) do |original_method, *args, &arg_block|
+      method_parameter_names.each_with_index do |arg_name, index|
+        if hash.key?(arg_name)
+          args[index] = (hash[arg_name].is_a?Proc) ? hash[arg_name].call(self, method_name, args[index]) : hash[arg_name]
+        end
       end
-    }
 
-    instance_exec_b(arg_block, *args, &old_method) }
-  end
-
-  def before(precedence=1,&before_logic)
-    add_transformation(precedence) {|old_method, *args, &arg_block|
-      instance_exec_b(arg_block, old_method, *args, &before_logic) }
-  end
-
-
-  def after(precedence=1,&after_logic)
-    add_transformation(precedence) { |old_method, *args, &arg_block|
-      instance_exec_b(arg_block, *args, &old_method)
-      instance_exec_b(arg_block, *args, &after_logic) }
-  end
-
-  def instead_of(precedence=0,&instead_of_logic)
-    add_transformation(precedence) { |_, *args, &arg_block| instance_exec_b(arg_block, *args, &instead_of_logic) }
-  end
-
-  def redirect_to(target,precedence=0)
-    method_name = @original_method.name
-    add_transformation(precedence) { |_, *args, &arg_block|target.send(method_name, *args, &arg_block) }
-  end
-
-  known_transformations.each do |transformation_symbol|
-    define_method("consumible_#{transformation_symbol}") do |n,*args,&logic|
-    transformation = self.send(transformation_symbol,*args,&logic)
-    transformation.consumible(n)
+      original_method.call(*args,&arg_block)
     end
   end
 
+  def before(precedence = 1, &before_logic)
+    add_transformation(precedence) {|original_method, *args, &arg_block|
+      instance_exec_b(arg_block, original_method, *args, &before_logic) }
+  end
 
 
+  def after(precedence = 1, &after_logic)
+    before(precedence) do |original_method, *args, &arg_block|
+      original_method.call(*args,&arg_block)
+      instance_exec_b(arg_block, *args,&after_logic)
+    end
+  end
+
+  def instead_of(precedence = 0, &instead_of_logic)
+    before(precedence) do |_, *args, &arg_block| instance_exec_b(arg_block, *args, &instead_of_logic) end
+  end
+
+  def redirect_to(precedence = 0, target)
+    method_name = @original_method.name
+    before(precedence) do |_,*args,&arg_block| target.send(method_name,*args,&arg_block) end
+  end
 
 end
 
