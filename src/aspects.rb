@@ -27,14 +27,14 @@ class Aspects
     end
   end
 
-  def self.find_origins(*possible_origins)
+  def self.find_origins *possible_origins
     origins = possible_origins.flat_map &method(:to_origins)
 
     raise EmptyOriginException.new("Can't call Aspects.on without origins to transform") if origins.empty?
     origins.uniq
   end
 
-  def self.on(*possible_origins, &block)
+  def self.on *possible_origins, &block
     find_origins(*possible_origins).flat_map { |origin| Origin.new(origin).instance_eval &block }
   end
 

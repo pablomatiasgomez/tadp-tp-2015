@@ -14,16 +14,16 @@ end
 
 class Transformation
 
-  def initialize(&transformation)
+  def initialize &transformation
     @transformation = transformation
   end
 
-  def transform(method,target)
+  def transform method,target
     transformation=@transformation
     proc  { |*args, &arg_block| target.instance_exec_b(arg_block, method, *args, &transformation) }
   end
 
-  def consumible(n)
+  def consumible n
     counter=0
     regular_transformation=@transformation
     times=n
@@ -46,14 +46,14 @@ class Transformer
 
   known_transformations=[:instead_of,:before,:after,:redirect_to,:inject]
 
-  def initialize(origin, original_method, visibility)
+  def initialize origin, original_method, visibility
     @origin = origin
-    @original_method = origin.instance_method(original_method)
+    @original_method = origin.instance_method original_method
     @transformations = MultiLevelQueue.new
     @visibility = visibility
   end
 
-  def transform_method(&transforms)
+  def transform_method &transforms
     instance_eval &transforms
 
     transformations = self.transformations.to_list
@@ -68,13 +68,13 @@ class Transformer
 
   end
 
-  def add_transformation(precedence, &transformation_block)
+  def add_transformation precedence, &transformation_block
     transformation = Transformation.new(&transformation_block)
     @transformations[precedence] << transformation
     transformation
   end
 
-  def inject(precedence = 2, hash)
+  def inject precedence = 2, hash
     method_parameter_names = @original_method.parameters.map { |_, n| n }
     method_name = @original_method.name
 
@@ -93,29 +93,29 @@ class Transformer
     end
   end
 
-  def before(precedence = 1, &before_logic)
+  def before precedence = 1, &before_logic
     add_transformation(precedence) {|original_method, *args, &arg_block|
       instance_exec_b(arg_block, original_method, *args, &before_logic) }
   end
 
 
-  def after(precedence = 1, &after_logic)
+  def after precedence = 1, &after_logic
     before(precedence) do |original_method, *args, &arg_block|
       original_method.call(*args,&arg_block)
       instance_exec_b(arg_block, *args,&after_logic)
     end
   end
 
-  def instead_of(precedence = 0, &instead_of_logic)
+  def instead_of precedence = 0, &instead_of_logic
     before(precedence) do |_, *args, &arg_block| instance_exec_b(arg_block, *args, &instead_of_logic) end
   end
 
-  def redirect_to(precedence = 0, target)
+  def redirect_to precedence = 0, target
     method_name = @original_method.name
     before(precedence) do |_,*args,&arg_block| target.send(method_name,*args,&arg_block) end
   end
 
-  def consumible(times_used,*transformations)
+  def consumible times_used,*transformations
     transformations.each {|transformation| transformation.consumible(times_used)}
   end
 
